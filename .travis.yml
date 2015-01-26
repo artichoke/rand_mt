@@ -1,7 +1,7 @@
 language: rust
 env:
   global:
-    - secure: jns9i+YkboKop08x++Cg5e+NA2poUAsP5UzwBRkjWHVUq+dE+BpoVb6W+RIQKhZMPY6a2rXSFNDhn2NBKXyTgGjmgnFyhRPHsjR0XfjGPqMO1IAEoGLXzqbit2ToB2Z8tLkynvYlUR3wAnzr9De95inHvKh8/PA1Y+M7i8Bg6T8=
+    - secure: b/kIRK9PnIaZCU7AY4k9Fw6CXSWOtoyCnWsjBiIsZY9yP+MN8b18PO4ZKwDlQwdje0qNHy44e7VjSng2Bn7eOBcl/H85wjyfolFF7EpJEOZQdT1f3A4zlzKdcuHKPrFpKG/UV7cEj72dtSkuzVHfAaS3k69mYz7dTgu6M9+zbAY=
 script:
   - cargo build --verbose
   - cargo test --verbose
