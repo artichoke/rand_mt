@@ -1,0 +1,9 @@
+[package]
+name = "mersenne_twister"
+version = "0.0.1"
+authors = ["David Creswick <dcrewi@gyrae.net>"]
+license = "Apache-2.0"
+description = "Mersenne Twister pseudorandom number generator"
+repository = "https://github.com/dcrewi/rust-mersenne-twister"
+readme = "README.md"
+keywords = ["random", "rng", "algorithm"]
