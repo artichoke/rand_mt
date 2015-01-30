@@ -81,7 +81,3 @@ pub type MersenneTwister = MT19937;
 /// The most platform-appropriate Mersenne Twister flavor.
 #[cfg(target_pointer_width = "64")]
 pub type MersenneTwister = MT19937_64;
-
-
-#[cfg(test)]
-const BENCHMARK_ITERATIONS: usize = 10000;

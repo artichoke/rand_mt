@@ -719,19 +719,7 @@ fn benchmark_seeding(b: &mut ::test::Bencher) {
 }
 
 #[bench]
-fn benchmark_generation_no_seeding(b: &mut ::test::Bencher) {
+fn benchmark_fill_next_state(b: &mut ::test::Bencher) {
     let mut mt = MT19937_64::new_unseeded();
-    b.iter(|| for _ in range(0, super::BENCHMARK_ITERATIONS) {
-        mt.next_u64();
-    });
-}
-
-#[bench]
-fn benchmark_generation_with_seeding(b: &mut ::test::Bencher) {
-    b.iter(|| {
-        let mut mt = MT19937_64::new_unseeded();
-        for _ in range(0, super::BENCHMARK_ITERATIONS) {
-            mt.next_u64();
-        }
-    });
+    b.iter(|| mt.fill_next_state());
 }
