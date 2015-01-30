@@ -43,7 +43,7 @@
 //! }
 //! ```
 //!
-//! Or if you want to use the default seeds:
+//! Or if you want to use the default (fixed) seeds:
 //!
 //! ```
 //! # use mersenne_twister::MersenneTwister;
