@@ -61,7 +61,7 @@
 //! important to you.
 
 #![unstable]
-#![allow(unstable)]
+#![feature(core, rand)]
 #![deny(missing_docs)]
 
 #[cfg(test)]
