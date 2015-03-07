@@ -17,20 +17,21 @@
 use std::cmp::max;
 use std::default::Default;
 use std::mem;
+use std::num::wrapping::Wrapping;
 use std::rand::{Rng, SeedableRng};
 
 const N: usize = 624;
 const M: usize = 397;
-const MATRIX_A: u32 = 0x9908b0df;
-const UPPER_MASK: u32 = 0x80000000;
-const LOWER_MASK: u32 = 0x7fffffff;
+const MATRIX_A: Wrapping<u32> = Wrapping(0x9908b0df);
+const UPPER_MASK: Wrapping<u32> = Wrapping(0x80000000);
+const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fffffff);
 
 /// The 32-bit flavor of the Mersenne Twister pseudorandom number
 /// generator.
 #[derive(Copy)]
 pub struct MT19937 {
     idx: usize,
-    state: [u32; N],
+    state: [Wrapping<u32>; N],
 }
 
 impl SeedableRng<u32> for MT19937 {
@@ -43,9 +44,9 @@ impl SeedableRng<u32> for MT19937 {
 
     fn reseed(&mut self, seed: u32) {
         self.idx = N;
-        self.state[0] = seed;
+        self.state[0] = Wrapping(seed);
         for i in range(1, N) {
-            self.state[i] = 1812433253 * (self.state[i-1] ^ (self.state[i-1]>>30)) + i as u32;
+            self.state[i] = Wrapping(1812433253) * (self.state[i-1] ^ (self.state[i-1]>>30)) + Wrapping(i as u32);
         }
     }
 }
@@ -63,7 +64,7 @@ impl<'a> SeedableRng<&'a [u32]> for MT19937 {
         let mut i = 1;
         let mut j = 0;
         for _ in range(0, max(N, key.len())) {
-            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * 1664525)) + key[j] + j as u32;
+            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * Wrapping(1664525))) + Wrapping(key[j]) + Wrapping(j as u32);
             i += 1;
             if i >= N {
                 self.state[0] = self.state[N-1];
@@ -75,14 +76,14 @@ impl<'a> SeedableRng<&'a [u32]> for MT19937 {
             }
         }
         for _ in range(0, N-1) {
-            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * 1566083941)) - i as u32;
+            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * Wrapping(1566083941))) - Wrapping(i as u32);
             i += 1;
             if i >= N {
                 self.state[0] = self.state[N-1];
                 i = 1;
             }
         }
-        self.state[0] = 1 << 31;
+        self.state[0] = Wrapping(1 << 31);
     }
 }
 
@@ -108,7 +109,7 @@ impl Rng for MT19937 {
         if self.idx >= N {
             self.fill_next_state();
         }
-        let mut x = self.state[self.idx];
+        let Wrapping(mut x) = self.state[self.idx];
         self.idx += 1;
         x ^=  x>>11;
         x ^= (x<< 7) & 0x9d2c5680;
@@ -127,17 +128,17 @@ impl MT19937 {
     }
 
     fn fill_next_state(&mut self) {
-        static MAG01: [u32; 2] = [0, MATRIX_A];
+        static MAG01: [Wrapping<u32>; 2] = [Wrapping(0), MATRIX_A];
         for i in range(0, N-M) {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
-            self.state[i] = self.state[i+M] ^ (x>>1) ^ MAG01[(x&1) as usize];
+            self.state[i] = self.state[i+M] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
         for i in range(N-M, N-1) {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
-            self.state[i] = self.state[i+M-N] ^ (x>>1) ^ MAG01[(x&1) as usize];
+            self.state[i] = self.state[i+M-N] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
         let x = (self.state[N-1]&UPPER_MASK) | (self.state[0]&LOWER_MASK);
-        self.state[N-1] = self.state[M-1] ^ (x>>1) ^ MAG01[(x&1) as usize];
+        self.state[N-1] = self.state[M-1] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         self.idx = 0;
     }
 }
@@ -152,20 +153,24 @@ impl Default for MT19937 {
 #[test]
 fn test_32bit_seeded() {
     let mt: MT19937 = SeedableRng::from_seed(0x12345678u32);
-    assert!(&mt.state[] == &STATE_SEEDED_BY_U32[]);
+    for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_U32.iter()) {
+        assert!(x == y);
+    }
 }
 
 #[test]
 fn test_32bit_slice_seeded() {
     let mt: MT19937 = SeedableRng::from_seed(&[0x123u32, 0x234u32,
-                                               0x345u32, 0x456u32][]);
-    assert!(&mt.state[] == &STATE_SEEDED_BY_SLICE[]);
+                                               0x345u32, 0x456u32][..]);
+    for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_SLICE.iter()) {
+        assert!(x == y);
+    }
 }
 
 #[test]
 fn test_32bit_output() {
     let mut mt: MT19937 = SeedableRng::from_seed(&[0x123u32, 0x234u32,
-                                                   0x345u32, 0x456u32][]);
+                                                   0x345u32, 0x456u32][..]);
     for x in TEST_OUTPUT.iter() {
         assert!(mt.next_u32() == *x);
     }

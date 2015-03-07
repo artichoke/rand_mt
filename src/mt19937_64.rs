@@ -17,13 +17,14 @@
 use std::cmp::max;
 use std::default::Default;
 use std::mem;
+use std::num::wrapping::Wrapping;
 use std::rand::{Rng, SeedableRng};
 
 const NN: usize = 312;
 const MM: usize = 156;
-const MATRIX_A: u64 = 0xB5026F5AA96619E9;
-const UM: u64 =  0xFFFFFFFF80000000; // Most significant 33 bits
-const LM: u64 =          0x7FFFFFFF; // Least significant 31 bits
+const MATRIX_A: Wrapping<u64> = Wrapping(0xB5026F5AA96619E9);
+const UM: Wrapping<u64> =  Wrapping(0xFFFFFFFF80000000); // Most significant 33 bits
+const LM: Wrapping<u64> =  Wrapping(        0x7FFFFFFF); // Least significant 31 bits
 
 /// The 64-bit flavor of the Mersenne Twister pseudorandom number
 /// generator.
@@ -31,7 +32,7 @@ const LM: u64 =          0x7FFFFFFF; // Least significant 31 bits
 #[derive(Copy)]
 pub struct MT19937_64 {
     idx: usize,
-    state: [u64; NN],
+    state: [Wrapping<u64>; NN],
 }
 
 impl SeedableRng<u64> for MT19937_64 {
@@ -44,9 +45,9 @@ impl SeedableRng<u64> for MT19937_64 {
 
     fn reseed(&mut self, seed: u64) {
         self.idx = NN;
-        self.state[0] = seed;
+        self.state[0] = Wrapping(seed);
         for i in range(1, NN) {
-            self.state[i] = 6364136223846793005 * (self.state[i-1] ^ (self.state[i-1] >> 62)) + i as u64;
+            self.state[i] = Wrapping(6364136223846793005) * (self.state[i-1] ^ (self.state[i-1] >> 62)) + Wrapping(i as u64);
         }
     }
 }
@@ -64,7 +65,7 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
         let mut i = 1;
         let mut j = 0;
         for _ in range(0, max(NN, key.len())) {
-            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * 3935559000370003845)) + key[j] + j as u64;
+            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * Wrapping(3935559000370003845))) + Wrapping(key[j]) + Wrapping(j as u64);
             i += 1;
             if i >= NN {
                 self.state[0] = self.state[NN-1];
@@ -76,14 +77,14 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
             }
         }
         for _ in range(0, NN-1) {
-            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * 2862933555777941757)) - i as u64;
+            self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * Wrapping(2862933555777941757))) - Wrapping(i as u64);
             i += 1;
             if i >= NN {
                 self.state[0] = self.state[NN-1];
                 i = 1;
             }
         }
-        self.state[0] = 1 << 63;
+        self.state[0] = Wrapping(1 << 63);
     }
 }
 
@@ -98,7 +99,7 @@ impl Rng for MT19937_64 {
         if self.idx >= NN {
             self.fill_next_state();
         }
-        let mut x = self.state[self.idx];
+        let Wrapping(mut x) = self.state[self.idx];
         self.idx += 1;
         x ^= (x >> 29) & 0x5555555555555555;
         x ^= (x << 17) & 0x71D67FFFEDA60000;
@@ -117,17 +118,17 @@ impl MT19937_64 {
     }
 
     fn fill_next_state(&mut self) {
-        static MAG01: [u64; 2] = [0, MATRIX_A];
+        static MAG01: [Wrapping<u64>; 2] = [Wrapping(0), MATRIX_A];
         for i in range(0, NN-MM) {
             let x = (self.state[i]&UM) | (self.state[i+1]&LM);
-            self.state[i] = self.state[i+MM] ^ (x>>1) ^ MAG01[(x&1) as usize];
+            self.state[i] = self.state[i+MM] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
         for i in range(NN-MM, NN-1) {
             let x = (self.state[i]&UM) | (self.state[i+1]&LM);
-            self.state[i] = self.state[i+MM-NN] ^ (x>>1) ^ MAG01[(x&1) as usize];
+            self.state[i] = self.state[i+MM-NN] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
         let x = (self.state[NN-1]&UM) | (self.state[0]&LM);
-        self.state[NN-1] = self.state[MM-1] ^ (x>>1) ^ MAG01[(x&1) as usize];
+        self.state[NN-1] = self.state[MM-1] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         self.idx = 0;
     }
 }
@@ -142,20 +143,24 @@ impl Default for MT19937_64 {
 #[test]
 fn test_64bit_seeded() {
     let mt: MT19937_64 = SeedableRng::from_seed(0x123456789abcdefu64);
-    assert!(&mt.state[] == &STATE_SEEDED_BY_U64[]);
+    for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_U64.iter()) {
+        assert!(x == y);
+    }
 }
 
 #[test]
 fn test_64bit_slice_seeded() {
     let mt: MT19937_64 = SeedableRng::from_seed(&[0x12345u64, 0x23456u64,
-                                                  0x34567u64, 0x45678u64][]);
-    assert!(&mt.state[] == &STATE_SEEDED_BY_SLICE[]);
+                                                  0x34567u64, 0x45678u64][..]);
+    for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_SLICE.iter()) {
+        assert!(x == y);
+    }
 }
 
 #[test]
 fn test_64bit_output() {
     let mut mt: MT19937_64 = SeedableRng::from_seed(&[0x12345u64, 0x23456u64,
-                                                      0x34567u64, 0x45678u64][]);
+                                                      0x34567u64, 0x45678u64][..]);
     for x in TEST_OUTPUT.iter() {
         assert!(mt.next_u64() == *x);
     }
