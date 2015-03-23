@@ -46,7 +46,7 @@ impl SeedableRng<u64> for MT19937_64 {
     fn reseed(&mut self, seed: u64) {
         self.idx = NN;
         self.state[0] = Wrapping(seed);
-        for i in range(1, NN) {
+        for i in 1..NN {
             self.state[i] = Wrapping(6364136223846793005) * (self.state[i-1] ^ (self.state[i-1] >> 62)) + Wrapping(i as u64);
         }
     }
@@ -64,7 +64,7 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
         self.reseed(19650218u64);
         let mut i = 1;
         let mut j = 0;
-        for _ in range(0, max(NN, key.len())) {
+        for _ in 0 .. max(NN, key.len()) {
             self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * Wrapping(3935559000370003845))) + Wrapping(key[j]) + Wrapping(j as u64);
             i += 1;
             if i >= NN {
@@ -76,7 +76,7 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
                 j = 0;
             }
         }
-        for _ in range(0, NN-1) {
+        for _ in 0 .. NN-1 {
             self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>62)) * Wrapping(2862933555777941757))) - Wrapping(i as u64);
             i += 1;
             if i >= NN {
@@ -119,11 +119,11 @@ impl MT19937_64 {
 
     fn fill_next_state(&mut self) {
         static MAG01: [Wrapping<u64>; 2] = [Wrapping(0), MATRIX_A];
-        for i in range(0, NN-MM) {
+        for i in 0 .. NN-MM {
             let x = (self.state[i]&UM) | (self.state[i+1]&LM);
             self.state[i] = self.state[i+MM] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
-        for i in range(NN-MM, NN-1) {
+        for i in NN-MM .. NN-1 {
             let x = (self.state[i]&UM) | (self.state[i+1]&LM);
             self.state[i] = self.state[i+MM-NN] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }

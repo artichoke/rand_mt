@@ -45,7 +45,7 @@ impl SeedableRng<u32> for MT19937 {
     fn reseed(&mut self, seed: u32) {
         self.idx = N;
         self.state[0] = Wrapping(seed);
-        for i in range(1, N) {
+        for i in 1..N {
             self.state[i] = Wrapping(1812433253) * (self.state[i-1] ^ (self.state[i-1]>>30)) + Wrapping(i as u32);
         }
     }
@@ -63,7 +63,7 @@ impl<'a> SeedableRng<&'a [u32]> for MT19937 {
         self.reseed(19650218u32);
         let mut i = 1;
         let mut j = 0;
-        for _ in range(0, max(N, key.len())) {
+        for _ in 0 .. max(N, key.len()) {
             self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * Wrapping(1664525))) + Wrapping(key[j]) + Wrapping(j as u32);
             i += 1;
             if i >= N {
@@ -75,7 +75,7 @@ impl<'a> SeedableRng<&'a [u32]> for MT19937 {
                 j = 0;
             }
         }
-        for _ in range(0, N-1) {
+        for _ in 0 .. N-1 {
             self.state[i] = (self.state[i] ^ ((self.state[i-1] ^ (self.state[i-1]>>30)) * Wrapping(1566083941))) - Wrapping(i as u32);
             i += 1;
             if i >= N {
@@ -129,11 +129,11 @@ impl MT19937 {
 
     fn fill_next_state(&mut self) {
         static MAG01: [Wrapping<u32>; 2] = [Wrapping(0), MATRIX_A];
-        for i in range(0, N-M) {
+        for i in 0 .. N-M {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
             self.state[i] = self.state[i+M] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
-        for i in range(N-M, N-1) {
+        for i in N-M .. N-1 {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
             self.state[i] = self.state[i+M-N] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         }
