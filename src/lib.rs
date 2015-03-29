@@ -29,6 +29,7 @@
 //! way:
 //!
 //! ```
+//! #![feature(rand)]
 //! extern crate mersenne_twister;
 //! use mersenne_twister::MersenneTwister;
 //! use std::rand::{Rng, SeedableRng};
