@@ -62,7 +62,8 @@
 //! important to you.
 
 #![unstable]
-#![feature(core, test, rand)]
+#![feature(core, rand)]
+#![cfg_attr(test, feature(test))]
 #![deny(missing_docs)]
 
 #[cfg(test)]
