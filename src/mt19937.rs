@@ -34,6 +34,19 @@ pub struct MT19937 {
     state: [Wrapping<u32>; N],
 }
 
+// FIXME: This manual implementation will probably become unnecessary someday.
+impl Clone for MT19937 {
+    #[inline]
+    fn clone(&self) -> MT19937 {
+        use std::ptr;
+        unsafe {
+            let mut mt = mem::uninitialized();
+            ptr::copy_nonoverlapping(self, &mut mt, 1);
+            mt
+        }
+    }
+}
+
 impl SeedableRng<u32> for MT19937 {
     #[inline]
     fn from_seed(seed: u32) -> MT19937 {
