@@ -18,7 +18,8 @@ use std::cmp::max;
 use std::default::Default;
 use std::mem;
 use std::num::Wrapping;
-use std::rand::{Rng, SeedableRng};
+
+use rand::{Rng, SeedableRng};
 
 const N: usize = 624;
 const M: usize = 397;
@@ -112,7 +113,7 @@ impl SeedableRng<u64> for MT19937 {
     fn reseed(&mut self, seed: u64) {
         let seeds = [seed as u32,
                      (seed >> 32) as u32];
-        self.reseed(seeds.as_slice());
+        self.reseed(&seeds[..]);
     }
 }
 

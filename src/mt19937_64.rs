@@ -18,7 +18,8 @@ use std::cmp::max;
 use std::default::Default;
 use std::mem;
 use std::num::Wrapping;
-use std::rand::{Rng, SeedableRng};
+
+use rand::{Rng, SeedableRng};
 
 const NN: usize = 312;
 const MM: usize = 156;

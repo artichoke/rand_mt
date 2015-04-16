@@ -29,10 +29,10 @@
 //! way:
 //!
 //! ```
-//! #![feature(rand)]
 //! extern crate mersenne_twister;
+//! extern crate rand;
 //! use mersenne_twister::MersenneTwister;
-//! use std::rand::{Rng, SeedableRng};
+//! use rand::{Rng, SeedableRng};
 //!
 //! fn main() {
 //!     // Get a seed somehow.
@@ -48,7 +48,6 @@
 //!
 //! ```
 //! # use mersenne_twister::MersenneTwister;
-//! # use std::rand::{Rng, SeedableRng};
 //! use std::default::Default;
 //! let mut rng: MersenneTwister = Default::default();
 //! ```
@@ -61,13 +60,13 @@
 //! specific flavor of the algorithm if portable reproducibility is
 //! important to you.
 
-#![unstable]
-#![feature(core, rand)]
 #![cfg_attr(test, feature(test))]
 #![deny(missing_docs)]
 
 #[cfg(test)]
 extern crate test;
+
+extern crate rand;
 
 pub use mt19937::MT19937;
 pub use mt19937_64::MT19937_64;

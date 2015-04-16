@@ -8,3 +8,6 @@ repository = "https://github.com/dcrewi/rust-mersenne-twister"
 documentation = "https://dcrewi.github.io/rust-mersenne-twister/doc/0.1/mersenne_twister/index.html"
 readme = "README.md"
 keywords = ["random", "rng", "algorithm"]
+
+[dependencies]
+rand = "0.3.7"
