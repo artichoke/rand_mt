@@ -10,4 +10,4 @@ readme = "README.md"
 keywords = ["random", "rng", "algorithm"]
 
 [dependencies]
-rand = "0.3.7"
+rand = "0.3"
