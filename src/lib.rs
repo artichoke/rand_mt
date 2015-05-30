@@ -25,8 +25,8 @@
 //! ## Usage
 //!
 //! If your application does not require a specific Mersenne Twister
-//! flavor, you can use the default one for your target platform this
-//! way:
+//! flavor (32-bit or 64-bit), you can use the default one for your
+//! target platform this way:
 //!
 //! ```
 //! extern crate mersenne_twister;
@@ -44,7 +44,8 @@
 //! }
 //! ```
 //!
-//! Or if you want to use the default (fixed) seeds:
+//! Or if you want to use the default (fixed) seeds that are specified
+//! in the reference implementations:
 //!
 //! ```
 //! # use mersenne_twister::MersenneTwister;
