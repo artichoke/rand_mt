@@ -159,7 +159,7 @@ impl MT19937 {
     /// subsequent outputs of the RNG that was sampled. This is why
     /// one does not use Mersenne Twister in cryptography.
     ///
-    /// Fails if the length of the slice is not exactly 624.
+    /// Panics if the length of the slice is not exactly 624.
     pub fn recover(samples: &[u32]) -> MT19937 {
         assert!(samples.len() == N);
         let mut mt: MT19937 = unsafe { mem::uninitialized() };
