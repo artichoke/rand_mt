@@ -13,5 +13,6 @@ pseudorandom number generators. [See the rustdoc][doc] for suggested usage.
 
 ## Stability
 
-Rust's random number generator interfaces are unstable, and this
-crate's interface will continue to evolve with them.
+This crate takes advantage of rust's built-in benchmarking, which is
+still an unstable feature as of 1.0. Until it stabilizes, one must
+compile this crate with nightly, or fork it.
