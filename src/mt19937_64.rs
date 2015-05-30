@@ -68,7 +68,7 @@ impl SeedableRng<u64> for MT19937_64 {
 
 impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
     #[inline]
-    fn from_seed(seed: &'a [u64]) -> MT19937_64 {
+    fn from_seed(seed: &[u64]) -> MT19937_64 {
         let mut mt: MT19937_64 = unsafe { mem::uninitialized() };
         mt.reseed(seed);
         mt
@@ -113,13 +113,9 @@ impl Rng for MT19937_64 {
         if self.idx >= NN {
             self.fill_next_state();
         }
-        let Wrapping(mut x) = self.state[self.idx];
+        let Wrapping(x) = self.state[self.idx];
         self.idx += 1;
-        x ^= (x >> 29) & 0x5555555555555555;
-        x ^= (x << 17) & 0x71D67FFFEDA60000;
-        x ^= (x << 37) & 0xFFF7EEE000000000;
-        x ^=  x >> 43;
-        x
+        temper(x)
     }
 }
 
@@ -145,6 +141,53 @@ impl MT19937_64 {
         self.state[NN-1] = self.state[MM-1] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
         self.idx = 0;
     }
+
+    /// Recover the internal state of a Mersenne Twister instance
+    /// from 312 consecutive outputs of the algorithm.
+    ///
+    /// The returned `MT19937_64` is guaranteed to identically
+    /// reproduce subsequent outputs of the RNG that was sampled. This
+    /// is why one does not use Mersenne Twister in cryptography.
+    ///
+    /// Fails if the length of the slice is not exactly 312.
+    pub fn recover(samples: &[u64]) -> MT19937_64 {
+        assert!(samples.len() == NN);
+        let mut mt: MT19937_64 = unsafe { mem::uninitialized() };
+        for (in_, out) in Iterator::zip(samples.iter(), mt.state.iter_mut()) {
+            *out = Wrapping(untemper(*in_));
+        }
+        mt.idx = NN;
+        mt
+    }
+}
+
+#[inline]
+fn temper(mut x: u64) -> u64 {
+    x ^= (x >> 29) & 0x5555555555555555;
+    x ^= (x << 17) & 0x71D67FFFEDA60000;
+    x ^= (x << 37) & 0xFFF7EEE000000000;
+    x ^=  x >> 43;
+    x
+}
+
+#[inline]
+fn untemper(mut x: u64) -> u64 {
+    // reverse "x ^=  x >> 43;"
+    x ^=  x >> 43;
+
+    // reverse "x ^= (x << 37) & 0xFFF7EEE000000000;"
+    x ^= (x << 37) & 0xFFF7EEE000000000;
+
+    // reverse "x ^= (x << 17) & 0x71D67FFFEDA60000;"
+    x ^= (x << 17) & 0x00000003eda60000;
+    x ^= (x << 17) & 0x00067ffc00000000;
+    x ^= (x << 17) & 0x71d0000000000000;
+
+    // reverse "x ^= (x >> 29) & 0x5555555555555555;"
+    x ^= (x >> 29) & 0x0000000555555540;
+    x ^= (x >> 29) & 0x0000000000000015;
+
+    x
 }
 
 impl Default for MT19937_64 {
@@ -741,4 +784,26 @@ fn benchmark_seeding(b: &mut ::test::Bencher) {
 fn benchmark_fill_next_state(b: &mut ::test::Bencher) {
     let mut mt = MT19937_64::new_unseeded();
     b.iter(|| mt.fill_next_state());
+}
+
+#[test]
+fn test_untemper() {
+    let x = ::rand::thread_rng().gen::<u64>();
+    assert_eq!(x, untemper(temper(x)));
+}
+
+#[test]
+fn test_recovery() {
+    let seed = ::rand::thread_rng().gen::<u64>();
+    let mut orig_mt: MT19937_64 = SeedableRng::from_seed(seed);
+    // skip some samples so the RNG is in an intermediate state
+    let to_skip = ::rand::thread_rng().gen_range(1, NN);
+    for _ in 0..to_skip {
+        orig_mt.next_u64();
+    }
+    let samples = orig_mt.gen_iter::<u64>().take(NN).collect::<Vec<_>>();
+    let mut recovered_mt = MT19937_64::recover(&samples[..]);
+    for _ in 0..NN*2 {
+        assert!(orig_mt.next_u64() == recovered_mt.next_u64());
+    }
 }

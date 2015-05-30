@@ -20,6 +20,9 @@
 //! generator.
 //!
 //! **THESE ALGORITHMS ARE NOT APPROPRIATE FOR CRYPTOGRAPHIC USE.**
+//! After observing a couple hundred outputs, it is possible to
+//! predict all future outputs. This library even provides a `recover`
+//! constructor that does it.
 //!
 //!
 //! ## Usage
