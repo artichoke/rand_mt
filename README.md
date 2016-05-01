@@ -14,5 +14,6 @@ pseudorandom number generators. [See the rustdoc][doc] for suggested usage.
 ## Stability
 
 This crate takes advantage of rust's built-in benchmarking, which is
-still an unstable feature as of 1.0. Until it stabilizes, one must
-compile this crate with nightly, or fork it.
+still an unstable feature as of 1.8. Until it stabilizes, one must
+compile the tests for this crate with nightly, or fork the crate and
+remove the benchmarks.
