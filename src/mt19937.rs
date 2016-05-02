@@ -13,7 +13,7 @@ use std::default::Default;
 use std::mem;
 use std::num::Wrapping;
 
-use rand::{Rng, SeedableRng};
+use rand::{Rng, SeedableRng, Rand};
 
 const N: usize = 624;
 const M: usize = 397;
@@ -200,6 +200,13 @@ impl Default for MT19937 {
     #[inline]
     fn default() -> MT19937 {
         MT19937::new_unseeded()
+    }
+}
+
+impl Rand for MT19937 {
+    #[inline]
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        SeedableRng::from_seed(rng.gen::<u64>())
     }
 }
 
