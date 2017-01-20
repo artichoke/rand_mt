@@ -15,15 +15,17 @@
 //!
 //! **THESE ALGORITHMS ARE NOT APPROPRIATE FOR CRYPTOGRAPHIC USE.**
 //! After observing a couple hundred outputs, it is possible to
-//! predict all future outputs. This library even provides a `recover`
-//! constructor that does it.
+//! predict all future outputs. This library even implements a
+//! `recover` constructor to reconstruct the RNG state from output
+//! samples.
 //!
 //!
 //! ## Usage
 //!
 //! If your application does not require a specific Mersenne Twister
-//! flavor (32-bit or 64-bit), you can use the default one for your
-//! target platform this way:
+//! flavor (32-bit or 64-bit), you can use the default flavor for your
+//! target platform by using the `MersenneTwister` type
+//! definition. Either flavor accepts a `u64` seed.
 //!
 //! ```
 //! extern crate mersenne_twister;
@@ -54,9 +56,9 @@
 //!
 //! Note that `MT19937` and `MT19937_64` are **not** identical
 //! algorithms, despite their similar names. They produce different
-//! output streams when given the same seed. You will need to pick a
-//! specific flavor of the algorithm if portable reproducibility is
-//! important to you.
+//! output streams from the same seed. You will need to pick a
+//! specific flavor of the two algorithms if portable reproducibility
+//! is important to you.
 
 #![deny(missing_docs)]
 

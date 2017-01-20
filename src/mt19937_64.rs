@@ -139,8 +139,7 @@ impl MT19937_64 {
     /// from 312 consecutive outputs of the algorithm.
     ///
     /// The returned `MT19937_64` is guaranteed to identically
-    /// reproduce subsequent outputs of the RNG that was sampled. This
-    /// is why one does not use Mersenne Twister in cryptography.
+    /// reproduce subsequent outputs of the RNG that was sampled.
     ///
     /// Panics if the length of the slice is not exactly 312.
     pub fn recover(samples: &[u64]) -> MT19937_64 {
