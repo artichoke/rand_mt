@@ -5,7 +5,7 @@ authors = ["David Creswick <dcrewi@gyrae.net>"]
 license = "MIT/Apache-2.0"
 description = "Mersenne Twister pseudorandom number generator"
 repository = "https://github.com/dcrewi/rust-mersenne-twister"
-documentation = "https://dcrewi.github.io/rust-mersenne-twister/doc/0.3/mersenne_twister/index.html"
+documentation = "https://docs.rs/mersenne_twister/"
 readme = "README.md"
 keywords = ["random", "rng", "algorithm", "mersenne"]
 
