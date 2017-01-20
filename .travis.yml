@@ -1,6 +1,9 @@
 language: rust
-rust: nightly
-script:
-  - cargo build --verbose
-  - cargo test --verbose
-  - cargo doc
+rust:
+  - 1.0.0
+  - stable
+  - beta
+  - nightly
+matrix:
+  allow_failures:
+    - rust: nightly
