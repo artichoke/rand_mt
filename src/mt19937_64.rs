@@ -10,7 +10,6 @@
 
 use std::cmp::max;
 use std::default::Default;
-use std::mem;
 use std::num::Wrapping;
 
 use rand::{Rng, SeedableRng, Rand};
@@ -30,23 +29,23 @@ pub struct MT19937_64 {
     state: [Wrapping<u64>; NN],
 }
 
-// FIXME: This manual implementation will probably become unnecessary someday.
+const UNINITIALIZED: MT19937_64 = MT19937_64 {
+    idx: 0,
+    state: [Wrapping(0); NN]
+};
+
+// FIXME: This manual implementation will probably become unnecessary someday. For now, the Clone trait is not implemented for type [T; N], except where N is small.
 impl Clone for MT19937_64 {
     #[inline]
     fn clone(&self) -> MT19937_64 {
-        use std::ptr;
-        unsafe {
-            let mut mt = mem::uninitialized();
-            ptr::copy_nonoverlapping(self, &mut mt, 1);
-            mt
-        }
+        *self
     }
 }
 
 impl SeedableRng<u64> for MT19937_64 {
     #[inline]
     fn from_seed(seed: u64) -> MT19937_64 {
-        let mut mt: MT19937_64 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
@@ -63,7 +62,7 @@ impl SeedableRng<u64> for MT19937_64 {
 impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
     #[inline]
     fn from_seed(seed: &[u64]) -> MT19937_64 {
-        let mut mt: MT19937_64 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
@@ -146,7 +145,7 @@ impl MT19937_64 {
     /// Panics if the length of the slice is not exactly 312.
     pub fn recover(samples: &[u64]) -> MT19937_64 {
         assert!(samples.len() == NN);
-        let mut mt: MT19937_64 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         for (in_, out) in Iterator::zip(samples.iter(), mt.state.iter_mut()) {
             *out = Wrapping(untemper(*in_));
         }

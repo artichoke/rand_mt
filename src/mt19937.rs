@@ -10,7 +10,6 @@
 
 use std::cmp::max;
 use std::default::Default;
-use std::mem;
 use std::num::Wrapping;
 
 use rand::{Rng, SeedableRng, Rand};
@@ -29,23 +28,23 @@ pub struct MT19937 {
     state: [Wrapping<u32>; N],
 }
 
-// FIXME: This manual implementation will probably become unnecessary someday.
+const UNINITIALIZED: MT19937 = MT19937 {
+    idx: 0,
+    state: [Wrapping(0); N]
+};
+
+// FIXME: This manual implementation will probably become unnecessary someday. For now, the Clone trait is not implemented for type [T; N], except where N is small.
 impl Clone for MT19937 {
     #[inline]
     fn clone(&self) -> MT19937 {
-        use std::ptr;
-        unsafe {
-            let mut mt = mem::uninitialized();
-            ptr::copy_nonoverlapping(self, &mut mt, 1);
-            mt
-        }
+        *self
     }
 }
 
 impl SeedableRng<u32> for MT19937 {
     #[inline]
     fn from_seed(seed: u32) -> MT19937 {
-        let mut mt: MT19937 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
@@ -62,7 +61,7 @@ impl SeedableRng<u32> for MT19937 {
 impl<'a> SeedableRng<&'a [u32]> for MT19937 {
     #[inline]
     fn from_seed(seed: &[u32]) -> MT19937 {
-        let mut mt: MT19937 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
@@ -98,7 +97,7 @@ impl<'a> SeedableRng<&'a [u32]> for MT19937 {
 impl SeedableRng<u64> for MT19937 {
     #[inline]
     fn from_seed(seed: u64) -> MT19937 {
-        let mut mt: MT19937 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
@@ -156,7 +155,7 @@ impl MT19937 {
     /// Panics if the length of the slice is not exactly 624.
     pub fn recover(samples: &[u32]) -> MT19937 {
         assert!(samples.len() == N);
-        let mut mt: MT19937 = unsafe { mem::uninitialized() };
+        let mut mt = UNINITIALIZED;
         for (in_, out) in Iterator::zip(samples.iter(), mt.state.iter_mut()) {
             *out = Wrapping(untemper(*in_));
         }
