@@ -58,11 +58,7 @@
 //! specific flavor of the algorithm if portable reproducibility is
 //! important to you.
 
-#![cfg_attr(test, feature(test))]
 #![deny(missing_docs)]
-
-#[cfg(test)]
-extern crate test;
 
 extern crate rand;
 

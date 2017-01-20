@@ -776,17 +776,6 @@ static TEST_OUTPUT: [u64; 1000] = [
     994412663058993407];
 
 
-#[bench]
-fn benchmark_seeding(b: &mut ::test::Bencher) {
-    b.iter(|| MT19937_64::new_unseeded());
-}
-
-#[bench]
-fn benchmark_fill_next_state(b: &mut ::test::Bencher) {
-    let mut mt = MT19937_64::new_unseeded();
-    b.iter(|| mt.fill_next_state());
-}
-
 #[test]
 fn test_untemper() {
     let x = ::rand::thread_rng().gen::<u64>();
