@@ -1,6 +1,6 @@
 // src/mt19937.rs
 //
-// Copyright (c) 2015 rust-mersenne-twister developers
+// Copyright (c) 2015,2017 rust-mersenne-twister developers
 //
 // Licensed under the Apache License, Version 2.0
 // <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
@@ -8,8 +8,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::cmp::max;
+use std::cmp::{max, Ordering};
 use std::default::Default;
+use std::fmt::{self, Debug};
+use std::hash::{Hash, Hasher};
 use std::num::Wrapping;
 
 use rand::{Rng, SeedableRng, Rand};
@@ -32,14 +34,6 @@ const UNINITIALIZED: MT19937 = MT19937 {
     idx: 0,
     state: [Wrapping(0); N]
 };
-
-// FIXME: This manual implementation will probably become unnecessary someday. For now, the Clone trait is not implemented for type [T; N], except where N is small.
-impl Clone for MT19937 {
-    #[inline]
-    fn clone(&self) -> MT19937 {
-        *self
-    }
-}
 
 impl SeedableRng<u32> for MT19937 {
     #[inline]
@@ -113,6 +107,9 @@ impl SeedableRng<u64> for MT19937 {
 impl Rng for MT19937 {
     #[inline]
     fn next_u32(&mut self) -> u32 {
+        // Failing this check indicates that, somehow, the structure
+        // was not initialized.
+        debug_assert!(self.idx != 0);
         if self.idx >= N {
             self.fill_next_state();
         }
@@ -713,5 +710,61 @@ fn test_recovery() {
     let mut recovered_mt = MT19937::recover(&samples[..]);
     for _ in 0..N*2 {
         assert!(orig_mt.next_u32() == recovered_mt.next_u32());
+    }
+}
+
+
+// Note: At the time I'm writing this, the `derive` attribute does not
+// work for large-ish arrays, so these traits below that are usually
+// derived must be manually implemented.
+
+impl Clone for MT19937 {
+    #[inline(always)]
+    fn clone(&self) -> MT19937 {
+        *self
+    }
+}
+
+impl Debug for MT19937 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("MT19937")
+            .field("idx", &self.idx)
+            .field("state", &&self.state[..])
+            .finish()
+    }
+}
+
+impl Eq for MT19937 {}
+
+impl Hash for MT19937 {
+    fn hash<H: Hasher>(&self, hasher_state: &mut H) {
+        self.idx.hash(hasher_state);
+        for x in self.state.iter() {
+            x.0.hash(hasher_state)
+        }
+    }
+}
+
+impl Ord for MT19937 {
+    fn cmp(&self, other: &MT19937) -> Ordering {
+        match Ord::cmp(&self.idx, &other.idx) {
+            Ordering::Equal => Ord::cmp(&self.state[..],
+                                        &other.state[..]),
+            ordering => ordering
+        }
+    }
+}
+
+impl PartialEq for MT19937 {
+    fn eq(&self, other: &MT19937) -> bool {
+        self.idx == other.idx &&
+            Iterator::zip(self.state.iter(), other.state.iter())
+            .all(|(l,r)| l == r)
+    }
+}
+
+impl PartialOrd for MT19937 {
+    fn partial_cmp(&self, other: &MT19937) -> Option<Ordering> {
+        Some(Ord::cmp(self, other))
     }
 }

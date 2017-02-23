@@ -14,7 +14,7 @@ pseudorandom number generators. [See the rustdoc][doc] for suggested usage.
 ## Stability
 
 All code and tests should compile and run without problems on all 1.x
-versions of rust back to 1.0.0. The only exceptions is the
+versions of rust back to 1.2.0. The only exceptions is the
 benchmarks, which is still an unstable feature as of rust 1.14. They
 are optional though and the crate can be used without them.
 

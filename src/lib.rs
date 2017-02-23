@@ -1,6 +1,6 @@
 // src/lib.rs
 //
-// Copyright (c) 2015 rust-mersenne-twister developers
+// Copyright (c) 2015,2017 rust-mersenne-twister developers
 //
 // Licensed under the Apache License, Version 2.0
 // <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
