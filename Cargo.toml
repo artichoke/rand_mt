@@ -7,7 +7,7 @@ description = "Mersenne Twister pseudorandom number generator"
 repository = "https://github.com/dcrewi/rust-mersenne-twister"
 documentation = "https://docs.rs/mersenne_twister/"
 readme = "README.md"
-keywords = ["random", "rng", "algorithm", "mersenne"]
+keywords = ["random", "rand", "rng", "algorithm", "mersenne"]
 include = [
     "**/*.rs",
     "Cargo.toml",
