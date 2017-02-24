@@ -18,6 +18,7 @@ use rand::{Rng, SeedableRng, Rand};
 
 const N: usize = 624;
 const M: usize = 397;
+const ONE: Wrapping<u32> = Wrapping(1);
 const MATRIX_A: Wrapping<u32> = Wrapping(0x9908b0df);
 const UPPER_MASK: Wrapping<u32> = Wrapping(0x80000000);
 const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fffffff);
@@ -128,17 +129,16 @@ impl MT19937 {
     }
 
     fn fill_next_state(&mut self) {
-        static MAG01: [Wrapping<u32>; 2] = [Wrapping(0), MATRIX_A];
         for i in 0 .. N-M {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
-            self.state[i] = self.state[i+M] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
+            self.state[i] = self.state[i+M] ^ (x>>1) ^ ((x&ONE) * MATRIX_A);
         }
         for i in N-M .. N-1 {
             let x = (self.state[i]&UPPER_MASK) | (self.state[i+1]&LOWER_MASK);
-            self.state[i] = self.state[i+M-N] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
+            self.state[i] = self.state[i+M-N] ^ (x>>1) ^ ((x&ONE) * MATRIX_A);
         }
         let x = (self.state[N-1]&UPPER_MASK) | (self.state[0]&LOWER_MASK);
-        self.state[N-1] = self.state[M-1] ^ (x>>1) ^ MAG01[(x.0&1) as usize];
+        self.state[N-1] = self.state[M-1] ^ (x>>1) ^ ((x&ONE) * MATRIX_A);
         self.idx = 0;
     }
 
