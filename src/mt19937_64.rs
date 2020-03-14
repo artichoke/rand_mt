@@ -20,9 +20,9 @@ use rand::{Rand, Rng, SeedableRng};
 const NN: usize = 312;
 const MM: usize = 156;
 const ONE: Wrapping<u64> = Wrapping(1);
-const MATRIX_A: Wrapping<u64> = Wrapping(0xB5026F5AA96619E9);
-const UM: Wrapping<u64> = Wrapping(0xFFFFFFFF80000000); // Most significant 33 bits
-const LM: Wrapping<u64> = Wrapping(0x7FFFFFFF); // Least significant 31 bits
+const MATRIX_A: Wrapping<u64> = Wrapping(0xb502_6f5a_a966_19e9);
+const UM: Wrapping<u64> = Wrapping(0xffff_ffff_8000_0000); // Most significant 33 bits
+const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 
 /// The 64-bit flavor of the Mersenne Twister pseudorandom number
 /// generator.
@@ -50,7 +50,7 @@ impl SeedableRng<u64> for MT19937_64 {
         self.idx = NN;
         self.state[0] = Wrapping(seed);
         for i in 1..NN {
-            self.state[i] = Wrapping(6364136223846793005)
+            self.state[i] = Wrapping(6_364_136_223_846_793_005)
                 * (self.state[i - 1] ^ (self.state[i - 1] >> 62))
                 + Wrapping(i as u64);
         }
@@ -66,13 +66,13 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
     }
 
     fn reseed(&mut self, key: &[u64]) {
-        self.reseed(19650218u64);
+        self.reseed(19_650_218_u64);
         let mut i = 1;
         let mut j = 0;
         for _ in 0..max(NN, key.len()) {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 62))
-                    * Wrapping(3935559000370003845)))
+                    * Wrapping(3_935_559_000_370_003_845)))
                 + Wrapping(key[j])
                 + Wrapping(j as u64);
             i += 1;
@@ -88,7 +88,7 @@ impl<'a> SeedableRng<&'a [u64]> for MT19937_64 {
         for _ in 0..NN - 1 {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 62))
-                    * Wrapping(2862933555777941757)))
+                    * Wrapping(2_862_933_555_777_941_757)))
                 - Wrapping(i as u64);
             i += 1;
             if i >= NN {
@@ -162,9 +162,9 @@ impl MT19937_64 {
 
 #[inline]
 fn temper(mut x: u64) -> u64 {
-    x ^= (x >> 29) & 0x5555555555555555;
-    x ^= (x << 17) & 0x71D67FFFEDA60000;
-    x ^= (x << 37) & 0xFFF7EEE000000000;
+    x ^= (x >> 29) & 0x5555_5555_5555_5555;
+    x ^= (x << 17) & 0x71d6_7fff_eda6_0000;
+    x ^= (x << 37) & 0xfff7_eee0_0000_0000;
     x ^= x >> 43;
     x
 }
@@ -174,17 +174,17 @@ fn untemper(mut x: u64) -> u64 {
     // reverse "x ^=  x >> 43;"
     x ^= x >> 43;
 
-    // reverse "x ^= (x << 37) & 0xFFF7EEE000000000;"
-    x ^= (x << 37) & 0xFFF7EEE000000000;
+    // reverse "x ^= (x << 37) & 0xfff7_eee0_0000_0000;"
+    x ^= (x << 37) & 0xfff7_eee0_0000_0000;
 
-    // reverse "x ^= (x << 17) & 0x71D67FFFEDA60000;"
-    x ^= (x << 17) & 0x00000003eda60000;
-    x ^= (x << 17) & 0x00067ffc00000000;
-    x ^= (x << 17) & 0x71d0000000000000;
+    // reverse "x ^= (x << 17) & 0x71d6_7fff_eda6_0000;"
+    x ^= (x << 17) & 0x0000_0003_eda6_0000;
+    x ^= (x << 17) & 0x0006_7ffc_0000_0000;
+    x ^= (x << 17) & 0x71d0_0000_0000_0000;
 
-    // reverse "x ^= (x >> 29) & 0x5555555555555555;"
-    x ^= (x >> 29) & 0x0000000555555540;
-    x ^= (x >> 29) & 0x0000000000000015;
+    // reverse "x ^= (x >> 29) & 0x5555_5555_5555_5555;"
+    x ^= (x >> 29) & 0x0000_0005_5555_5540;
+    x ^= (x >> 29) & 0x0000_0000_0000_0015;
 
     x
 }
