@@ -34,7 +34,7 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 /// [`MT19937_64`](crate::MT19937_64).
 ///
 /// ```
-/// # use mersenne_twister::{MT19937, MT19937_64};
+/// # use rand_mt::{MT19937, MT19937_64};
 /// # use std::mem;
 /// assert_eq!(3 * mem::size_of::<usize>(), mem::size_of::<MT19937>());
 /// assert_eq!(mem::size_of::<MT19937_64>(), mem::size_of::<MT19937>());
@@ -53,8 +53,8 @@ impl SeedableRng for MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::{RngCore, SeedableRng};
+    /// # use rand_mt::MT19937;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
     /// let mut mt = MT19937::from_seed(seed);
@@ -77,8 +77,8 @@ impl RngCore for MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::RngCore;
+    /// # use rand_mt::MT19937;
     /// let mut mt = MT19937::new_unseeded();
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
@@ -97,8 +97,8 @@ impl RngCore for MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::RngCore;
+    /// # use rand_mt::MT19937;
     /// let mut mt = MT19937::new_unseeded();
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
@@ -126,8 +126,8 @@ impl RngCore for MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::RngCore;
+    /// # use rand_mt::MT19937;
     /// let mut mt = MT19937::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.fill_bytes(&mut buf);
@@ -173,8 +173,8 @@ impl RngCore for MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::RngCore;
+    /// # use rand_mt::MT19937;
     /// let mut mt = MT19937::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.try_fill_bytes(&mut buf).unwrap();
@@ -205,8 +205,8 @@ impl MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::SeedableRng;
+    /// # use rand_mt::MT19937;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
     /// let mt = MT19937::from_seed(seed);
@@ -258,8 +258,8 @@ impl MT19937 {
     /// # Examples
     ///
     /// ```
-    /// # use mersenne_twister::MT19937;
     /// # use rand_core::{RngCore, SeedableRng};
+    /// # use rand_mt::MT19937;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
     /// let mut mt = MT19937::from_seed(seed);
