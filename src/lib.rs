@@ -71,7 +71,6 @@ pub use mt19937_64::MT19937_64;
 mod mt19937;
 mod mt19937_64;
 
-
 /// The most platform-appropriate Mersenne Twister flavor.
 #[cfg(target_pointer_width = "32")]
 pub type MersenneTwister = MT19937;

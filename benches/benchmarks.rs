@@ -1,13 +1,12 @@
 #![feature(test)]
 extern crate test;
 
-extern crate rand;
 extern crate mersenne_twister;
-
+extern crate rand;
 
 mod mt19937 {
-    use rand::Rng;
     use mersenne_twister::MT19937;
+    use rand::Rng;
 
     #[bench]
     fn benchmark_seeding(b: &mut ::test::Bencher) {
@@ -27,10 +26,9 @@ mod mt19937 {
     }
 }
 
-
 mod mt19937_64 {
-    use rand::Rng;
     use mersenne_twister::MT19937_64;
+    use rand::Rng;
 
     #[bench]
     fn benchmark_seeding(b: &mut ::test::Bencher) {
