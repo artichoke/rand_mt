@@ -127,7 +127,8 @@ impl MT19937 {
     /// subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 624 elements.
-    pub fn recover(samples: &[u32]) -> Option<MT19937> {
+    #[must_use]
+    pub fn recover(samples: &[u32]) -> Option<Self> {
         if samples.len() != N {
             return None;
         }

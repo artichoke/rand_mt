@@ -248,7 +248,7 @@ mod tests {
     #[test]
     fn test_64bit_slice_seeded() {
         let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64][..]);
+        mt.reseed_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
@@ -257,7 +257,7 @@ mod tests {
     #[test]
     fn test_64bit_output() {
         let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64][..]);
+        mt.reseed_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u64() == *x);
         }
