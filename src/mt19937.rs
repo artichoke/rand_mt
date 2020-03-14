@@ -132,6 +132,9 @@ impl RngCore for MT19937 {
     /// let mut buf = [0; 32];
     /// mt.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);
+    /// let mut buf = [0; 31];
+    /// mt.fill_bytes(&mut buf);
+    /// assert_ne!([0; 31], buf);
     /// ```
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         let mut bytes_written = 0;
@@ -176,6 +179,9 @@ impl RngCore for MT19937 {
     /// let mut buf = [0; 32];
     /// mt.try_fill_bytes(&mut buf).unwrap();
     /// assert_ne!([0; 32], buf);
+    /// let mut buf = [0; 31];
+    /// mt.try_fill_bytes(&mut buf).unwrap();
+    /// assert_ne!([0; 31], buf);
     /// ```
     #[inline]
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {

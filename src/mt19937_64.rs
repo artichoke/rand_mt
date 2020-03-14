@@ -49,6 +49,17 @@ impl SeedableRng for MT19937_64 {
     type Seed = [u8; 8];
 
     /// Reseed from a little endian encoded `u64`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::{RngCore, SeedableRng};
+    /// // Default MT seed
+    /// let seed = 5489_u64.to_le_bytes();
+    /// let mut mt = MT19937_64::from_seed(seed);
+    /// assert_ne!(mt.next_u32(), mt.next_u32());
+    /// ```
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
         let mut mt = Self::uninitialized();
@@ -58,12 +69,19 @@ impl SeedableRng for MT19937_64 {
 }
 
 impl RngCore for MT19937_64 {
-    #[inline]
-    #[allow(clippy::cast_possible_truncation)]
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
-    }
-
+    /// Generate next `u64` output.
+    ///
+    /// `u64` is the native output of the generator. This function advances the
+    /// RNG step counter by one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::RngCore;
+    /// let mut mt = MT19937_64::new_unseeded();
+    /// assert_ne!(mt.next_u64(), mt.next_u64());
+    /// ```
     #[inline]
     fn next_u64(&mut self) -> u64 {
         // Failing this check indicates that, somehow, the structure
@@ -77,6 +95,46 @@ impl RngCore for MT19937_64 {
         temper(x)
     }
 
+    /// Generate next `u32` output.
+    ///
+    /// This function is implemented by generating one `u64`s from the RNG and
+    /// shifting + masking them into a `u32` output.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::RngCore;
+    /// let mut mt = MT19937_64::new_unseeded();
+    /// assert_ne!(mt.next_u32(), mt.next_u32());
+    /// ```
+    #[inline]
+    #[allow(clippy::cast_possible_truncation)]
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    /// Fill a buffer with bytes generated from the RNG.
+    ///
+    /// This method generates random `u64`s (the native output unit of the RNG)
+    /// until `dest` is filled.
+    ///
+    /// This method may discard some output bits if `dest.len()` is not a
+    /// multiple of 8.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::RngCore;
+    /// let mut mt = MT19937_64::new_unseeded();
+    /// let mut buf = [0; 32];
+    /// mt.fill_bytes(&mut buf);
+    /// assert_ne!([0; 32], buf);
+    /// let mut buf = [0; 31];
+    /// mt.fill_bytes(&mut buf);
+    /// assert_ne!([0; 31], buf);
+    /// ```
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         let mut bytes_written = 0;
         loop {
@@ -100,6 +158,30 @@ impl RngCore for MT19937_64 {
         }
     }
 
+    /// Fill a buffer with bytes generated from the RNG.
+    ///
+    /// This method generates random `u64`s (the native output unit of the RNG)
+    /// until `dest` is filled.
+    ///
+    /// This method may discard some output bits if `dest.len()` is not a
+    /// multiple of 8.
+    ///
+    /// `try_fill_bytes` is implemented with [`fill_bytes`](RngCore::fill_bytes)
+    /// and is infallible.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::RngCore;
+    /// let mut mt = MT19937_64::new_unseeded();
+    /// let mut buf = [0; 32];
+    /// mt.try_fill_bytes(&mut buf).unwrap();
+    /// assert_ne!([0; 32], buf);
+    /// let mut buf = [0; 31];
+    /// mt.try_fill_bytes(&mut buf).unwrap();
+    /// assert_ne!([0; 31], buf);
+    /// ```
     #[inline]
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
         self.fill_bytes(dest);
@@ -108,6 +190,7 @@ impl RngCore for MT19937_64 {
 }
 
 impl MT19937_64 {
+    /// Generate an `MT19937` with zeroed state.
     fn uninitialized() -> Self {
         Self {
             idx: 0,
@@ -117,6 +200,18 @@ impl MT19937_64 {
 
     /// Create a new Mersenne Twister random number generator using
     /// the default fixed seed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::SeedableRng;
+    /// // Default MT seed
+    /// let seed = 5489_u64.to_le_bytes();
+    /// let mt = MT19937_64::from_seed(seed);
+    /// let unseeded = MT19937_64::new_unseeded();
+    /// assert_eq!(mt, unseeded);
+    /// ```
     #[inline]
     #[must_use]
     pub fn new_unseeded() -> Self {
@@ -158,6 +253,21 @@ impl MT19937_64 {
     }
 
     /// Reseed a Mersenne Twister from a single `u64`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mersenne_twister::MT19937_64;
+    /// # use rand_core::{RngCore, SeedableRng};
+    /// // Default MT seed
+    /// let seed = 5489_u64.to_le_bytes();
+    /// let mut mt = MT19937_64::from_seed(seed);
+    /// let first = mt.next_u64();
+    /// mt.fill_bytes(&mut [0; 512]);
+    /// // Default MT seed
+    /// mt.reseed(5489_u64);
+    /// assert_eq!(first, mt.next_u64());
+    /// ```
     pub fn reseed(&mut self, seed: u64) {
         self.idx = NN;
         self.state[0] = Wrapping(seed);
@@ -169,9 +279,6 @@ impl MT19937_64 {
     }
 
     /// Reseed a Mersenne Twister from a sequence of `u64`s.
-    ///
-    /// This method can be used to reconstruct a PRNG's internal state from an
-    /// observed sequence of random numbers.
     pub fn reseed_from_slice(&mut self, key: &[u64]) {
         self.reseed(19_650_218_u64);
         let mut i = 1;
