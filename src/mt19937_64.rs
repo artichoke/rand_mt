@@ -1,6 +1,7 @@
 // src/mt19937_64.rs
 //
 // Copyright (c) 2015,2017 rust-mersenne-twister developers
+// Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
 // <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT

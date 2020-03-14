@@ -1,13 +1,14 @@
 [package]
-name = "mersenne_twister"
-version = "1.1.1"
-authors = ["David Creswick <dcrewi@gyrae.net>"]
-license = "MIT/Apache-2.0"
-description = "Mersenne Twister pseudorandom number generator"
-repository = "https://github.com/dcrewi/rust-mersenne-twister"
-documentation = "https://docs.rs/mersenne_twister/"
+name = "rand_mt"
+version = "2.0.0-dev"
+authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
+license = "MIT OR Apache-2.0"
 readme = "README.md"
-keywords = ["random", "rand", "rng", "algorithm", "mersenne"]
+repository = "https://github.com/artichoke/rand_mt"
+documentation = "https://artichoke.github.io/rand_mt/rand_mt/"
+description = "Reference Mersenne Twister random number generators"
+keywords = ["random", "rand", "rng", "mt"]
+categories = ["algorithms"]
 include = [
     "**/*.rs",
     "Cargo.toml",
@@ -18,7 +19,3 @@ include = [
 
 [dependencies]
 rand = ">=0.3, <0.5"
-
-[badges]
-travis-ci = { repository = "dcrewi/rust-mersenne-twister" }
-maintenance = { status = "passively-maintained" }

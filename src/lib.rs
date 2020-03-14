@@ -1,6 +1,7 @@
 // src/lib.rs
 //
 // Copyright (c) 2015,2017 rust-mersenne-twister developers
+// Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
 // <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
@@ -28,9 +29,9 @@
 //! definition. Either flavor accepts a `u64` seed.
 //!
 //! ```
-//! extern crate mersenne_twister;
+//! extern crate rand_mt;
 //! extern crate rand;
-//! use mersenne_twister::MersenneTwister;
+//! use rand_mt::MersenneTwister;
 //! use rand::{Rng, SeedableRng};
 //!
 //! fn main() {
@@ -47,7 +48,7 @@
 //! in the reference implementations:
 //!
 //! ```
-//! # use mersenne_twister::MersenneTwister;
+//! # use rand_mt::MersenneTwister;
 //! use std::default::Default;
 //! let mut rng: MersenneTwister = Default::default();
 //! ```
