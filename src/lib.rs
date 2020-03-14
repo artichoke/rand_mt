@@ -65,8 +65,8 @@
 
 extern crate rand;
 
-pub use mt19937::MT19937;
-pub use mt19937_64::MT19937_64;
+pub use crate::mt19937::MT19937;
+pub use crate::mt19937_64::MT19937_64;
 
 mod mt19937;
 mod mt19937_64;
