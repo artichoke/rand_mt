@@ -1,0 +1,32 @@
+[advisories]
+vulnerability = "deny"
+unmaintained = "deny"
+notice = "warn"
+ignore = []
+
+[licenses]
+unlicensed = "deny"
+allow = [
+  "BSD-3-Clause",
+  "ISC",
+  "MIT",
+  "Apache-2.0",
+]
+deny = []
+copyleft = "deny"
+allow-osi-fsf-free = "neither"
+default = "deny"
+confidence-threshold = 0.8
+
+[bans]
+multiple-versions = "deny"
+highlight = "all"
+allow = []
+deny = []
+skip = []
+skip-tree = [{ name = "rand_core", version = "< 0.5" }]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-git = []
