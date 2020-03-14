@@ -33,16 +33,18 @@ pub struct MT19937_64 {
 impl SeedableRng for MT19937_64 {
     type Seed = [u8; 8];
 
+    /// Reseed from a little endian encoded `u64`.
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
         let mut mt = Self::uninitialized();
-        mt.reseed(seed);
+        mt.reseed(u64::from_le_bytes(seed));
         mt
     }
 }
 
 impl RngCore for MT19937_64 {
     #[inline]
+    #[allow(clippy::cast_possible_truncation)]
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }
@@ -66,7 +68,7 @@ impl RngCore for MT19937_64 {
             if bytes_written >= dest.len() {
                 break;
             }
-            let bytes = self.next_u64().to_ne_bytes();
+            let bytes = self.next_u64().to_le_bytes();
             if let Some(slice) = dest.get_mut(bytes_written..bytes_written + 8) {
                 slice.copy_from_slice(&bytes[..]);
                 bytes_written += 8;
@@ -101,8 +103,9 @@ impl MT19937_64 {
     /// Create a new Mersenne Twister random number generator using
     /// the default fixed seed.
     #[inline]
+    #[must_use]
     pub fn new_unseeded() -> Self {
-        Self::from_seed(5489_u64.to_ne_bytes())
+        Self::from_seed(5489_u64.to_le_bytes())
     }
 
     fn fill_next_state(&mut self) {
@@ -126,22 +129,23 @@ impl MT19937_64 {
     /// reproduce subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 312 elements.
-    pub fn recover(samples: &[<Self as SeedableRng>::Seed]) -> Option<Self> {
+    #[must_use]
+    pub fn recover(samples: &[u64]) -> Option<Self> {
         if samples.len() != NN {
             return None;
         }
         let mut mt = Self::uninitialized();
         for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
-            *out = Wrapping(untemper(u64::from_ne_bytes(in_)));
+            *out = Wrapping(untemper(in_));
         }
         mt.idx = NN;
         Some(mt)
     }
 
     /// Reseed a Mersenne Twister from a single `u64`.
-    pub fn reseed(&mut self, seed: <Self as SeedableRng>::Seed) {
+    pub fn reseed(&mut self, seed: u64) {
         self.idx = NN;
-        self.state[0] = Wrapping(u64::from_ne_bytes(seed));
+        self.state[0] = Wrapping(seed);
         for i in 1..NN {
             self.state[i] = Wrapping(6_364_136_223_846_793_005)
                 * (self.state[i - 1] ^ (self.state[i - 1] >> 62))
@@ -153,15 +157,15 @@ impl MT19937_64 {
     ///
     /// This method can be used to reconstruct a PRNG's internal state from an
     /// observed sequence of random numbers.
-    pub fn reseed_from_slice(&mut self, key: &[<Self as SeedableRng>::Seed]) {
-        self.reseed(19_650_218_u64.to_ne_bytes());
+    pub fn reseed_from_slice(&mut self, key: &[u64]) {
+        self.reseed(19_650_218_u64);
         let mut i = 1;
         let mut j = 0;
         for _ in 0..cmp::max(NN, key.len()) {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 62))
                     * Wrapping(3_935_559_000_370_003_845)))
-                + Wrapping(u64::from_ne_bytes(key[j]))
+                + Wrapping(key[j])
                 + Wrapping(j as u64);
             i += 1;
             if i >= NN {
@@ -235,7 +239,7 @@ mod tests {
 
     #[test]
     fn test_64bit_seeded() {
-        let mt = MT19937_64::from_seed(0x0123_4567_89ab_cdef_u64.to_ne_bytes());
+        let mt = MT19937_64::from_seed(0x0123_4567_89ab_cdef_u64.to_le_bytes());
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U64.iter()) {
             assert!(x == y);
         }
@@ -244,14 +248,7 @@ mod tests {
     #[test]
     fn test_64bit_slice_seeded() {
         let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(
-            &[
-                0x12345_u64.to_ne_bytes(),
-                0x23456_u64.to_ne_bytes(),
-                0x34567_u64.to_ne_bytes(),
-                0x45678_u64.to_ne_bytes(),
-            ][..],
-        );
+        mt.reseed_from_slice(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
@@ -260,14 +257,7 @@ mod tests {
     #[test]
     fn test_64bit_output() {
         let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(
-            &[
-                0x12345_u64.to_ne_bytes(),
-                0x23456_u64.to_ne_bytes(),
-                0x34567_u64.to_ne_bytes(),
-                0x45678_u64.to_ne_bytes(),
-            ][..],
-        );
+        mt.reseed_from_slice(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64][..]);
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u64() == *x);
         }
@@ -280,14 +270,14 @@ mod tests {
 
     #[quickcheck]
     fn test_recovery(seed: u64, skip: u8) -> bool {
-        let mut orig_mt = MT19937_64::from_seed(seed.to_ne_bytes());
+        let mut orig_mt = MT19937_64::from_seed(seed.to_le_bytes());
         // skip some samples so the RNG is in an intermediate state
         for _ in 0..skip {
             orig_mt.next_u64();
         }
         let mut samples = Vec::with_capacity(super::NN);
         for _ in 0..super::NN {
-            samples.push(orig_mt.next_u64().to_ne_bytes());
+            samples.push(orig_mt.next_u64());
         }
         let mut recovered_mt = MT19937_64::recover(&samples[..]).unwrap();
         for _ in 0..super::NN * 2 {

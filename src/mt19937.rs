@@ -10,6 +10,7 @@
 // modified, or distributed except according to those terms.
 
 use std::cmp;
+use std::convert::TryFrom;
 use std::num::Wrapping;
 
 use rand_core::{RngCore, SeedableRng};
@@ -32,10 +33,11 @@ pub struct MT19937 {
 impl SeedableRng for MT19937 {
     type Seed = [u8; 4];
 
+    /// Reseed from a little endian encoded `u32`.
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
         let mut mt = Self::uninitialized();
-        mt.reseed(seed);
+        mt.reseed(u32::from_le_bytes(seed));
         mt
     }
 }
@@ -64,7 +66,7 @@ impl RngCore for MT19937 {
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         let mut bytes_written = 0;
         loop {
-            let bytes = self.next_u32().to_ne_bytes();
+            let bytes = self.next_u32().to_le_bytes();
             if let Some(slice) = dest.get_mut(bytes_written..bytes_written + 4) {
                 slice.copy_from_slice(&bytes[..]);
                 bytes_written += 4;
@@ -99,8 +101,9 @@ impl MT19937 {
     /// Create a new Mersenne Twister random number generator using
     /// the default fixed seed.
     #[inline]
+    #[must_use]
     pub fn new_unseeded() -> Self {
-        Self::from_seed(5489_u32.to_ne_bytes())
+        Self::from_seed(5489_u32.to_le_bytes())
     }
 
     fn fill_next_state(&mut self) {
@@ -124,26 +127,26 @@ impl MT19937 {
     /// subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 624 elements.
-    pub fn recover(samples: &[<Self as SeedableRng>::Seed]) -> Option<MT19937> {
+    pub fn recover(samples: &[u32]) -> Option<MT19937> {
         if samples.len() != N {
             return None;
         }
         let mut mt = Self::uninitialized();
         for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
-            *out = Wrapping(untemper(u32::from_ne_bytes(in_)));
+            *out = Wrapping(untemper(in_));
         }
         mt.idx = N;
         Some(mt)
     }
 
     /// Reseed a Mersenne Twister from a single `u32`.
-    pub fn reseed(&mut self, seed: <Self as SeedableRng>::Seed) {
+    pub fn reseed(&mut self, seed: u32) {
         self.idx = N;
-        self.state[0] = Wrapping(u32::from_ne_bytes(seed));
+        self.state[0] = Wrapping(seed);
         for i in 1..N {
             self.state[i] = Wrapping(1_812_433_253)
                 * (self.state[i - 1] ^ (self.state[i - 1] >> 30))
-                + Wrapping(i as u32);
+                + Wrapping(u32::try_from(i).unwrap_or_default());
         }
     }
 
@@ -151,15 +154,15 @@ impl MT19937 {
     ///
     /// This method can be used to reconstruct a PRNG's internal state from an
     /// observed sequence of random numbers.
-    pub fn reseed_from_slice(&mut self, key: &[<Self as SeedableRng>::Seed]) {
-        self.reseed(19_650_218_u32.to_ne_bytes());
-        let mut i = 1;
-        let mut j = 0;
+    pub fn reseed_from_slice(&mut self, key: &[u32]) {
+        self.reseed(19_650_218_u32);
+        let mut i = 1_usize;
+        let mut j = 0_usize;
         for _ in 0..cmp::max(N, key.len()) {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_664_525)))
-                + Wrapping(u32::from_ne_bytes(key[j]))
-                + Wrapping(j as u32);
+                + Wrapping(key[j])
+                + Wrapping(u32::try_from(j).unwrap_or_default());
             i += 1;
             if i >= N {
                 self.state[0] = self.state[N - 1];
@@ -173,7 +176,7 @@ impl MT19937 {
         for _ in 0..N - 1 {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_566_083_941)))
-                - Wrapping(i as u32);
+                - Wrapping(u32::try_from(i).unwrap_or_default());
             i += 1;
             if i >= N {
                 self.state[0] = self.state[N - 1];
@@ -233,7 +236,7 @@ mod tests {
 
     #[test]
     fn test_32bit_seeded() {
-        let mt = MT19937::from_seed(0x1234_5678_u32.to_ne_bytes());
+        let mt = MT19937::from_seed(0x1234_5678_u32.to_le_bytes());
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U32.iter()) {
             assert!(x == y);
         }
@@ -242,14 +245,7 @@ mod tests {
     #[test]
     fn test_32bit_slice_seeded() {
         let mut mt = MT19937::default();
-        mt.reseed_from_slice(
-            &[
-                0x123_u32.to_ne_bytes(),
-                0x234_u32.to_ne_bytes(),
-                0x345_u32.to_ne_bytes(),
-                0x456_u32.to_ne_bytes(),
-            ][..],
-        );
+        mt.reseed_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
@@ -258,14 +254,7 @@ mod tests {
     #[test]
     fn test_32bit_output() {
         let mut mt = MT19937::default();
-        mt.reseed_from_slice(
-            &[
-                0x123_u32.to_ne_bytes(),
-                0x234_u32.to_ne_bytes(),
-                0x345_u32.to_ne_bytes(),
-                0x456_u32.to_ne_bytes(),
-            ][..],
-        );
+        mt.reseed_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u32() == *x);
         }
@@ -278,14 +267,14 @@ mod tests {
 
     #[quickcheck]
     fn test_recovery(seed: u32, skip: u8) -> bool {
-        let mut orig_mt = MT19937::from_seed(seed.to_ne_bytes());
+        let mut orig_mt = MT19937::from_seed(seed.to_le_bytes());
         // skip some samples so the RNG is in an intermediate state
         for _ in 0..skip {
             orig_mt.next_u64();
         }
         let mut samples = Vec::with_capacity(super::N);
         for _ in 0..super::N {
-            samples.push(orig_mt.next_u32().to_ne_bytes());
+            samples.push(orig_mt.next_u32());
         }
         let mut recovered_mt = MT19937::recover(&samples[..]).unwrap();
         for _ in 0..super::N * 2 {

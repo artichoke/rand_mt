@@ -9,6 +9,12 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+#![deny(missing_docs, intra_doc_link_resolution_failure)]
+#![warn(rust_2018_idioms)]
+#![forbid(unsafe_code)]
+
 //! # Mersenne Twister
 //!
 //! A pure rust port of the Mersenne Twister pseudorandom number
