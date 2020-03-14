@@ -26,20 +26,15 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MT19937 {
     idx: usize,
-    state: Vec<Wrapping<u32>>, // Length `N`.
+    state: Box<[Wrapping<u32>]>, // Length `N`.
 }
-
-const UNINITIALIZED: MT19937 = MT19937 {
-    idx: 0,
-    state: Vec::new(),
-};
 
 impl SeedableRng for MT19937 {
     type Seed = [u8; 4];
 
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
-        let mut mt = UNINITIALIZED;
+        let mut mt = Self::uninitialized();
         mt.reseed(seed);
         mt
     }
@@ -94,6 +89,13 @@ impl RngCore for MT19937 {
 }
 
 impl MT19937 {
+    fn uninitialized() -> Self {
+        Self {
+            idx: 0,
+            state: vec![Wrapping(0); N].into_boxed_slice(),
+        }
+    }
+
     /// Create a new Mersenne Twister random number generator using
     /// the default fixed seed.
     #[inline]
@@ -126,8 +128,7 @@ impl MT19937 {
         if samples.len() != N {
             return None;
         }
-        let mut mt = UNINITIALIZED;
-        mt.state.resize(N, Wrapping(0));
+        let mut mt = Self::uninitialized();
         for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
             *out = Wrapping(untemper(u32::from_ne_bytes(in_)));
         }
@@ -137,7 +138,6 @@ impl MT19937 {
 
     /// Reseed a Mersenne Twister from a single `u32`.
     pub fn reseed(&mut self, seed: <Self as SeedableRng>::Seed) {
-        self.state.resize(N, Wrapping(0));
         self.idx = N;
         self.state[0] = Wrapping(u32::from_ne_bytes(seed));
         for i in 1..N {
