@@ -7,7 +7,7 @@ mod mt19937 {
 
     #[bench]
     fn benchmark_seeding(b: &mut ::test::Bencher) {
-        b.iter(|| MT19937::new_unseeded());
+        b.iter(MT19937::new_unseeded);
     }
 
     #[bench]
@@ -28,7 +28,7 @@ mod mt19937_64 {
 
     #[bench]
     fn benchmark_seeding(b: &mut ::test::Bencher) {
-        b.iter(|| MT19937_64::new_unseeded());
+        b.iter(MT19937_64::new_unseeded);
     }
 
     #[bench]
