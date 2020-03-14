@@ -5,6 +5,11 @@
     "description": "Area: CI build infrastructure."
   },
   {
+    "name": "A-core",
+    "color": "f7e101",
+    "description": "Area: Core MT implementation."
+  },
+  {
     "name": "A-deps",
     "color": "f7e101",
     "description": "Area: Source and library dependencies."
