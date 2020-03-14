@@ -24,6 +24,21 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 
 /// The 32-bit flavor of the Mersenne Twister pseudorandom number
 /// generator.
+///
+/// # Size
+///
+/// `MT19937` requires approximately 2.5KB of internal state.
+///
+/// `MT19937` stores its state on the heap to ease embedding a Mersenne Twister
+/// in another struct. `MT19937` is also the same size as
+/// [`MT19937_64`](crate::MT19937_64).
+///
+/// ```
+/// # use mersenne_twister::{MT19937, MT19937_64};
+/// # use std::mem;
+/// assert_eq!(3 * mem::size_of::<usize>(), mem::size_of::<MT19937>());
+/// assert_eq!(mem::size_of::<MT19937_64>(), mem::size_of::<MT19937>());
+/// ```
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MT19937 {
     idx: usize,
