@@ -29,19 +29,18 @@
 //! definition. Either flavor accepts a `u64` seed.
 //!
 //! ```
-//! extern crate rand_mt;
-//! extern crate rand;
-//! use rand_mt::MersenneTwister;
-//! use rand::{Rng, SeedableRng};
-//!
-//! fn main() {
-//!     // Get a seed somehow.
-//!     let seed: u64 = 0x123456789abcdef;
-//!     // Create the default RNG.
-//!     let mut rng: MersenneTwister = SeedableRng::from_seed(seed);
-//!
-//!     // start grabbing randomness from rng...
-//! }
+//! # use rand_mt::MersenneTwister;
+//! # use rand_core::{RngCore, SeedableRng};
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! // Get a seed somehow.
+//! let seed: [u8; 8] = 0x1234_567_89ab_cdef_u64.to_ne_bytes();
+//! // Create the default RNG.
+//! let mut rng = MersenneTwister::from_seed(seed);
+//! // start grabbing randomness from rng...
+//! let mut buf = vec![0; 512];
+//! rng.try_fill_bytes(&mut buf)?;
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Or if you want to use the default (fixed) seeds that are specified
@@ -62,8 +61,6 @@
 //! is important to you.
 
 #![deny(missing_docs)]
-
-extern crate rand;
 
 pub use crate::mt19937::MT19937;
 pub use crate::mt19937_64::MT19937_64;

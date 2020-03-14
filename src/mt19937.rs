@@ -9,13 +9,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::cmp::{max, Ordering};
-use std::default::Default;
-use std::fmt::{self, Debug};
-use std::hash::{Hash, Hasher};
+use std::cmp;
 use std::num::Wrapping;
 
-use rand::{Rand, Rng, SeedableRng};
+use rand_core::{RngCore, SeedableRng};
 
 const N: usize = 624;
 const M: usize = 397;
@@ -26,93 +23,36 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 
 /// The 32-bit flavor of the Mersenne Twister pseudorandom number
 /// generator.
-#[derive(Copy)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MT19937 {
     idx: usize,
-    state: [Wrapping<u32>; N],
+    state: Vec<Wrapping<u32>>, // Length `N`.
 }
 
 const UNINITIALIZED: MT19937 = MT19937 {
     idx: 0,
-    state: [Wrapping(0); N],
+    state: Vec::new(),
 };
 
-impl SeedableRng<u32> for MT19937 {
+impl SeedableRng for MT19937 {
+    type Seed = [u8; 4];
+
     #[inline]
-    fn from_seed(seed: u32) -> MT19937 {
+    fn from_seed(seed: Self::Seed) -> Self {
         let mut mt = UNINITIALIZED;
         mt.reseed(seed);
         mt
     }
-
-    fn reseed(&mut self, seed: u32) {
-        self.idx = N;
-        self.state[0] = Wrapping(seed);
-        for i in 1..N {
-            self.state[i] = Wrapping(1_812_433_253)
-                * (self.state[i - 1] ^ (self.state[i - 1] >> 30))
-                + Wrapping(i as u32);
-        }
-    }
 }
 
-impl<'a> SeedableRng<&'a [u32]> for MT19937 {
+impl RngCore for MT19937 {
     #[inline]
-    fn from_seed(seed: &[u32]) -> MT19937 {
-        let mut mt = UNINITIALIZED;
-        mt.reseed(seed);
-        mt
+    fn next_u64(&mut self) -> u64 {
+        let out = u64::from(self.next_u32());
+        let out = out << 32;
+        out | u64::from(self.next_u32())
     }
 
-    fn reseed(&mut self, key: &[u32]) {
-        self.reseed(19_650_218_u32);
-        let mut i = 1;
-        let mut j = 0;
-        for _ in 0..max(N, key.len()) {
-            self.state[i] = (self.state[i]
-                ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_664_525)))
-                + Wrapping(key[j])
-                + Wrapping(j as u32);
-            i += 1;
-            if i >= N {
-                self.state[0] = self.state[N - 1];
-                i = 1;
-            }
-            j += 1;
-            if j >= key.len() {
-                j = 0;
-            }
-        }
-        for _ in 0..N - 1 {
-            self.state[i] = (self.state[i]
-                ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_566_083_941)))
-                - Wrapping(i as u32);
-            i += 1;
-            if i >= N {
-                self.state[0] = self.state[N - 1];
-                i = 1;
-            }
-        }
-        self.state[0] = Wrapping(1 << 31);
-    }
-}
-
-impl SeedableRng<u64> for MT19937 {
-    #[inline]
-    fn from_seed(seed: u64) -> MT19937 {
-        let mut mt = UNINITIALIZED;
-        mt.reseed(seed);
-        mt
-    }
-
-    #[inline]
-    fn reseed(&mut self, seed: u64) {
-        let seeds = [seed as u32, (seed >> 32) as u32];
-        self.reseed(&seeds[..]);
-    }
-}
-
-impl Rng for MT19937 {
     #[inline]
     fn next_u32(&mut self) -> u32 {
         // Failing this check indicates that, somehow, the structure
@@ -125,14 +65,39 @@ impl Rng for MT19937 {
         self.idx += 1;
         temper(x)
     }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        let mut bytes_written = 0;
+        loop {
+            let bytes = self.next_u32().to_ne_bytes();
+            if let Some(slice) = dest.get_mut(bytes_written..bytes_written + 4) {
+                slice.copy_from_slice(&bytes[..]);
+                bytes_written += 4;
+            } else {
+                for byte in bytes.iter().copied() {
+                    if let Some(cell) = dest.get_mut(bytes_written) {
+                        *cell = byte;
+                        bytes_written += 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+        Ok(self.fill_bytes(dest))
+    }
 }
 
 impl MT19937 {
     /// Create a new Mersenne Twister random number generator using
     /// the default fixed seed.
     #[inline]
-    pub fn new_unseeded() -> MT19937 {
-        SeedableRng::from_seed(5489u32)
+    pub fn new_unseeded() -> Self {
+        Self::from_seed(5489_u32.to_ne_bytes())
     }
 
     fn fill_next_state(&mut self) {
@@ -155,15 +120,66 @@ impl MT19937 {
     /// The returned `MT19937` is guaranteed to identically reproduce
     /// subsequent outputs of the RNG that was sampled.
     ///
-    /// Panics if the length of the slice is not exactly 624.
-    pub fn recover(samples: &[u32]) -> MT19937 {
-        assert!(samples.len() == N);
+    /// Returns `None` if `samples` is not exactly 624 elements.
+    pub fn recover(samples: &[<Self as SeedableRng>::Seed]) -> Option<MT19937> {
+        if samples.len() != N {
+            return None;
+        }
         let mut mt = UNINITIALIZED;
-        for (in_, out) in Iterator::zip(samples.iter(), mt.state.iter_mut()) {
-            *out = Wrapping(untemper(*in_));
+        mt.state.resize(N, Wrapping(0));
+        for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
+            *out = Wrapping(untemper(u32::from_ne_bytes(in_)));
         }
         mt.idx = N;
-        mt
+        Some(mt)
+    }
+
+    /// Reseed a Mersenne Twister from a single `u32`.
+    pub fn reseed(&mut self, seed: <Self as SeedableRng>::Seed) {
+        self.state.resize(N, Wrapping(0));
+        self.idx = N;
+        self.state[0] = Wrapping(u32::from_ne_bytes(seed));
+        for i in 1..N {
+            self.state[i] = Wrapping(1_812_433_253)
+                * (self.state[i - 1] ^ (self.state[i - 1] >> 30))
+                + Wrapping(i as u32);
+        }
+    }
+
+    /// Reseed a Mersenne Twister from a sequence of `u32`s.
+    ///
+    /// This method can be used to reconstruct a PRNG's internal state from an
+    /// observed sequence of random numbers.
+    pub fn reseed_from_slice(&mut self, key: &[<Self as SeedableRng>::Seed]) {
+        self.reseed(19_650_218_u32.to_ne_bytes());
+        let mut i = 1;
+        let mut j = 0;
+        for _ in 0..cmp::max(N, key.len()) {
+            self.state[i] = (self.state[i]
+                ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_664_525)))
+                + Wrapping(u32::from_ne_bytes(key[j]))
+                + Wrapping(j as u32);
+            i += 1;
+            if i >= N {
+                self.state[0] = self.state[N - 1];
+                i = 1;
+            }
+            j += 1;
+            if j >= key.len() {
+                j = 0;
+            }
+        }
+        for _ in 0..N - 1 {
+            self.state[i] = (self.state[i]
+                ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_566_083_941)))
+                - Wrapping(i as u32);
+            i += 1;
+            if i >= N {
+                self.state[0] = self.state[N - 1];
+                i = 1;
+            }
+        }
+        self.state[0] = Wrapping(1 << 31);
     }
 }
 
@@ -200,28 +216,22 @@ fn untemper(mut x: u32) -> u32 {
 
 impl Default for MT19937 {
     #[inline]
-    fn default() -> MT19937 {
-        MT19937::new_unseeded()
-    }
-}
-
-impl Rand for MT19937 {
-    #[inline]
-    fn rand<R: Rng>(rng: &mut R) -> Self {
-        SeedableRng::from_seed(rng.gen::<u64>())
+    fn default() -> Self {
+        Self::new_unseeded()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use rand::{Rng, SeedableRng};
+    use quickcheck_macros::quickcheck;
+    use rand_core::{RngCore, SeedableRng};
     use std::num::Wrapping;
 
-    use super::{temper, untemper, MT19937, N};
+    use super::MT19937;
 
     #[test]
     fn test_32bit_seeded() {
-        let mt: MT19937 = SeedableRng::from_seed(0x12345678u32);
+        let mt = MT19937::from_seed(0x12345678_u32.to_ne_bytes());
         for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_U32.iter()) {
             assert!(x == y);
         }
@@ -229,7 +239,15 @@ mod tests {
 
     #[test]
     fn test_32bit_slice_seeded() {
-        let mt: MT19937 = SeedableRng::from_seed(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
+        let mut mt = MT19937::default();
+        mt.reseed_from_slice(
+            &[
+                0x123_u32.to_ne_bytes(),
+                0x234_u32.to_ne_bytes(),
+                0x345_u32.to_ne_bytes(),
+                0x456_u32.to_ne_bytes(),
+            ][..],
+        );
         for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
@@ -237,13 +255,21 @@ mod tests {
 
     #[test]
     fn test_32bit_output() {
-        let mut mt: MT19937 = SeedableRng::from_seed(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
+        let mut mt = MT19937::default();
+        mt.reseed_from_slice(
+            &[
+                0x123_u32.to_ne_bytes(),
+                0x234_u32.to_ne_bytes(),
+                0x345_u32.to_ne_bytes(),
+                0x456_u32.to_ne_bytes(),
+            ][..],
+        );
         for x in TEST_OUTPUT.iter() {
             assert!(mt.next_u32() == *x);
         }
     }
 
-    static STATE_SEEDED_BY_U32: [u32; N] = [
+    const STATE_SEEDED_BY_U32: [u32; super::N] = [
         305419896, 775181657, 499207455, 1600259134, 3349832671, 2158895569, 3851567941, 933167269,
         2845216289, 560713432, 2837590850, 1856731211, 4010544958, 3935610910, 4016625791,
         3415983355, 3013963240, 561813347, 3403724065, 2542053501, 4110119215, 3740807793,
@@ -334,7 +360,7 @@ mod tests {
         2761604293, 3716414450,
     ];
 
-    static STATE_SEEDED_BY_SLICE: [u32; N] = [
+    const STATE_SEEDED_BY_SLICE: [u32; super::N] = [
         2147483648, 1827812183, 1371430253, 3559376401, 4152304030, 3484546413, 904688886,
         2640105624, 3033298696, 3386595201, 369478181, 2269089429, 618892536, 1404079710,
         2891471128, 2871169702, 1020385029, 3311824836, 923090660, 1921041923, 1544466474,
@@ -425,7 +451,7 @@ mod tests {
         2430429081, 2427698197, 668479568, 1616806017, 77518867,
     ];
 
-    static TEST_OUTPUT: [u32; 1000] = [
+    const TEST_OUTPUT: [u32; 1000] = [
         1067595299, 955945823, 477289528, 4107218783, 4228976476, 3344332714, 3355579695,
         227628506, 810200273, 2591290167, 2560260675, 3242736208, 646746669, 1479517882,
         4245472273, 1143372638, 3863670494, 3221021970, 1773610557, 1138697238, 1421897700,
@@ -568,78 +594,28 @@ mod tests {
         2225147448, 1249609188, 2643151863, 3896204135, 2416995901, 1397735321, 3460025646,
     ];
 
-    #[test]
-    fn test_untemper() {
-        let x = ::rand::thread_rng().gen::<u32>();
-        assert_eq!(x, untemper(temper(x)));
+    #[quickcheck]
+    fn test_untemper(x: u32) -> bool {
+        x == super::untemper(super::temper(x))
     }
 
-    #[test]
-    fn test_recovery() {
-        let seed = ::rand::thread_rng().gen::<u32>();
-        let mut orig_mt: MT19937 = SeedableRng::from_seed(seed);
+    #[quickcheck]
+    fn test_recovery(seed: u32, skip: u8) -> bool {
+        let mut orig_mt = MT19937::from_seed(seed.to_ne_bytes());
         // skip some samples so the RNG is in an intermediate state
-        let to_skip = ::rand::thread_rng().gen_range(1, N);
-        for _ in 0..to_skip {
-            orig_mt.next_u32();
+        for _ in 0..skip {
+            orig_mt.next_u64();
         }
-        let samples = orig_mt.gen_iter::<u32>().take(N).collect::<Vec<_>>();
-        let mut recovered_mt = MT19937::recover(&samples[..]);
-        for _ in 0..N * 2 {
-            assert!(orig_mt.next_u32() == recovered_mt.next_u32());
+        let mut samples = Vec::with_capacity(super::N);
+        for _ in 0..super::N {
+            samples.push(orig_mt.next_u32().to_ne_bytes());
         }
-    }
-}
-
-// Note: At the time I'm writing this, the `derive` attribute does not
-// work for large-ish arrays, so these traits below that are usually
-// derived must be manually implemented.
-
-impl Clone for MT19937 {
-    #[inline(always)]
-    fn clone(&self) -> MT19937 {
-        *self
-    }
-}
-
-impl Debug for MT19937 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("MT19937")
-            .field("idx", &self.idx)
-            .field("state", &&self.state[..])
-            .finish()
-    }
-}
-
-impl Eq for MT19937 {}
-
-impl Hash for MT19937 {
-    fn hash<H: Hasher>(&self, hasher_state: &mut H) {
-        self.idx.hash(hasher_state);
-        for x in self.state.iter() {
-            x.0.hash(hasher_state)
+        let mut recovered_mt = MT19937::recover(&samples[..]).unwrap();
+        for _ in 0..super::N * 2 {
+            if orig_mt.next_u32() != recovered_mt.next_u32() {
+                return false;
+            }
         }
-    }
-}
-
-impl Ord for MT19937 {
-    fn cmp(&self, other: &MT19937) -> Ordering {
-        match Ord::cmp(&self.idx, &other.idx) {
-            Ordering::Equal => Ord::cmp(&self.state[..], &other.state[..]),
-            ordering => ordering,
-        }
-    }
-}
-
-impl PartialEq for MT19937 {
-    fn eq(&self, other: &MT19937) -> bool {
-        self.idx == other.idx
-            && Iterator::zip(self.state.iter(), other.state.iter()).all(|(l, r)| l == r)
-    }
-}
-
-impl PartialOrd for MT19937 {
-    fn partial_cmp(&self, other: &MT19937) -> Option<Ordering> {
-        Some(Ord::cmp(self, other))
+        true
     }
 }
