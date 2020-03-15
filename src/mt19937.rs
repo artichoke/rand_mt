@@ -9,9 +9,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::cmp;
-use std::convert::TryFrom;
-use std::num::Wrapping;
+use core::cmp;
+use core::fmt;
+use core::hash;
+use core::num::Wrapping;
 
 use rand_core::{RngCore, SeedableRng};
 
@@ -29,20 +30,60 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 ///
 /// `MT19937` requires approximately 2.5KB of internal state.
 ///
-/// `MT19937` stores its state on the heap to ease embedding a Mersenne Twister
-/// in another struct. `MT19937` is also the same size as
-/// [`MT19937_64`](crate::MT19937_64).
+/// You may wish to store an `MT19937` on the heap in a `Box` to make it
+/// easier to embed in another struct.
+///
+/// `MT19937` is also the same size as [`MT19937_64`](crate::MT19937_64).
 ///
 /// ```
 /// # use rand_mt::{MT19937, MT19937_64};
 /// # use std::mem;
-/// assert_eq!(3 * mem::size_of::<usize>(), mem::size_of::<MT19937>());
+/// assert_eq!(2504, mem::size_of::<MT19937>());
 /// assert_eq!(mem::size_of::<MT19937_64>(), mem::size_of::<MT19937>());
 /// ```
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone)]
 pub struct MT19937 {
     idx: usize,
-    state: Box<[Wrapping<u32>]>, // Length `N`.
+    state: [Wrapping<u32>; N],
+}
+
+impl fmt::Debug for MT19937 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MT19937")
+            .field("idx", &self.idx)
+            .field("state", &&self.state[..])
+            .finish()
+    }
+}
+
+impl hash::Hash for MT19937 {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.idx.hash(state);
+        self.state.hash(state);
+    }
+}
+
+impl cmp::PartialEq for MT19937 {
+    fn eq(&self, other: &Self) -> bool {
+        self.state[..] == other.state[..] && self.idx == other.idx
+    }
+}
+
+impl cmp::Eq for MT19937 {}
+
+impl cmp::PartialOrd for MT19937 {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl cmp::Ord for MT19937 {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        match (&self.state[..]).cmp(&other.state[..]) {
+            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
+            ordering => ordering,
+        }
+    }
 }
 
 impl SeedableRng for MT19937 {
@@ -195,7 +236,7 @@ impl MT19937 {
     fn uninitialized() -> Self {
         Self {
             idx: 0,
-            state: Box::new([Wrapping(0); N]),
+            state: [Wrapping(0); N],
         }
     }
 
@@ -308,17 +349,19 @@ impl MT19937 {
     /// mt.reseed(5489_u32);
     /// assert_eq!(first, mt.next_u32());
     /// ```
+    #[allow(clippy::cast_possible_truncation)]
     pub fn reseed(&mut self, seed: u32) {
         self.idx = N;
         self.state[0] = Wrapping(seed);
         for i in 1..N {
             self.state[i] = Wrapping(1_812_433_253)
                 * (self.state[i - 1] ^ (self.state[i - 1] >> 30))
-                + Wrapping(u32::try_from(i).unwrap_or_default());
+                + Wrapping(i as u32);
         }
     }
 
     /// Reseed a Mersenne Twister from a sequence of `u32`s.
+    #[allow(clippy::cast_possible_truncation)]
     pub fn reseed_from_slice(&mut self, key: &[u32]) {
         self.reseed(19_650_218_u32);
         let mut i = 1_usize;
@@ -327,7 +370,7 @@ impl MT19937 {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_664_525)))
                 + Wrapping(key[j])
-                + Wrapping(u32::try_from(j).unwrap_or_default());
+                + Wrapping(j as u32);
             i += 1;
             j += 1;
             if i >= N {
@@ -341,7 +384,7 @@ impl MT19937 {
         for _ in 0..N - 1 {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_566_083_941)))
-                - Wrapping(u32::try_from(i).unwrap_or_default());
+                - Wrapping(i as u32);
             i += 1;
             if i >= N {
                 self.state[0] = self.state[N - 1];

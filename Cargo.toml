@@ -9,7 +9,7 @@ repository = "https://github.com/artichoke/rand_mt"
 documentation = "https://artichoke.github.io/rand_mt/rand_mt/"
 description = "Reference Mersenne Twister random number generators"
 keywords = ["random", "rand", "rng", "mt"]
-categories = ["algorithms"]
+categories = ["algorithms", "no-std"]
 include = [
     "**/*.rs",
     "Cargo.toml",
