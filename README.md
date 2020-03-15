@@ -23,8 +23,7 @@ This crate depends on [rand_core](https://crates.io/crates/rand_core).
 
 Mersenne Twister requires ~2.5KB of internal state. To make the RNGs implemented
 in this crate practical to embed in other structs, `rand_mt` stores state in
-boxed slices. Because of the dependency on `Box` and `Vec`, `rand_mt` requires
-`std`.
+boxed slices. Because of the dependency on `Box`, `rand_mt` requires `std`.
 
 ## License
 

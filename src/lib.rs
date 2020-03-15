@@ -48,8 +48,8 @@
 //! # use rand_mt::MersenneTwister;
 //! # use rand_core::{RngCore, SeedableRng};
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! // Get a seed somehow.
-//! let seed: [u8; 8] = 0x1234_567_89ab_cdef_u64.to_ne_bytes();
+//! // Get a seed somehow, expected to be a little endian encoded `u64`.
+//! let seed: [u8; 8] = 0x1234_567_89ab_cdef_u64.to_le_bytes();
 //! // Create the default RNG.
 //! let mut rng = MersenneTwister::from_seed(seed);
 //! // start grabbing randomness from rng...
