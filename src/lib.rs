@@ -15,6 +15,7 @@
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
 #![forbid(unsafe_code)]
+#![cfg_attr(not(any(doctest, test)), no_std)]
 
 //! Mersenne Twister random number generators.
 //!
@@ -75,8 +76,6 @@
 //! despite their similar names. They produce different output streams from the
 //! same seed. You will need to pick a specific flavor of the two algorithms if
 //! portable reproducibility is important to you.
-
-#![deny(missing_docs)]
 
 pub use crate::mt19937::MT19937;
 pub use crate::mt19937_64::MT19937_64;

@@ -9,8 +9,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::cmp;
-use std::num::Wrapping;
+use core::cmp;
+use core::fmt;
+use core::hash;
+use core::num::Wrapping;
 
 use rand_core::{RngCore, SeedableRng};
 
@@ -28,21 +30,61 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 ///
 /// `MT19937_64` requires approximately 2.5KB of internal state.
 ///
-/// `MT19937_64` stores its state on the heap to ease embedding a Mersenne
-/// Twister in another struct. `MT19937_64` is also the same size as
-/// [`MT19937`](crate::MT19937).
+/// You may wish to store an `MT19937_64` on the heap in a `Box` to make it
+/// easier to embed in another struct.
+///
+/// `MT19937_64` is also the same size as [`MT19937`](crate::MT19937).
 ///
 /// ```
 /// # use rand_mt::{MT19937, MT19937_64};
 /// # use std::mem;
-/// assert_eq!(3 * mem::size_of::<usize>(), mem::size_of::<MT19937_64>());
+/// assert_eq!(2504, mem::size_of::<MT19937_64>());
 /// assert_eq!(mem::size_of::<MT19937>(), mem::size_of::<MT19937_64>());
 /// ```
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone)]
 pub struct MT19937_64 {
     idx: usize,
-    state: Box<[Wrapping<u64>]>, // Length `NN`
+    state: [Wrapping<u64>; NN],
+}
+
+impl fmt::Debug for MT19937_64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MT19937_64")
+            .field("idx", &self.idx)
+            .field("state", &&self.state[..])
+            .finish()
+    }
+}
+
+impl hash::Hash for MT19937_64 {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.idx.hash(state);
+        self.state.hash(state);
+    }
+}
+
+impl cmp::PartialEq for MT19937_64 {
+    fn eq(&self, other: &Self) -> bool {
+        self.state[..] == other.state[..] && self.idx == other.idx
+    }
+}
+
+impl cmp::Eq for MT19937_64 {}
+
+impl cmp::PartialOrd for MT19937_64 {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl cmp::Ord for MT19937_64 {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        match (&self.state[..]).cmp(&other.state[..]) {
+            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
+            ordering => ordering,
+        }
+    }
 }
 
 impl SeedableRng for MT19937_64 {
@@ -194,7 +236,7 @@ impl MT19937_64 {
     fn uninitialized() -> Self {
         Self {
             idx: 0,
-            state: Box::new([Wrapping(0); NN]),
+            state: [Wrapping(0); NN],
         }
     }
 
