@@ -1,0 +1,16 @@
+**/*
+
+!**/*/
+
+node_modules/
+target/
+
+!*.html
+!*.json
+!*.md
+!*.toml
+!*.yaml
+!*.yml
+
+**/vendor/*
+!**/vendor/*.md
