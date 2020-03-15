@@ -8,8 +8,8 @@
 
 Implemenents a selection of Mersenne Twister random number generators.
 
-> A very fast random number generator of period 2<sup>19937</sup>-1. [Makoto
-> Matsumoto, 1997]
+> A very fast random number generator of period 2<sup>19937</sup>-1. (Makoto
+> Matsumoto, 1997).
 
 The Mersenne Twister algorithms are not suitable for cryptographic uses, but are
 ubiquitous. See the
@@ -31,3 +31,7 @@ boxed slices. Because of the dependency on `Box` and `Vec`, `rand_mt` requires
 `rand_mt` is distributed under the terms of either the
 [MIT License](/LICENSE-MIT) or the
 [Apache License (Version 2.0)](/LICENSE-APACHE).
+
+`rand_mt` is derived from `rust-mersenne-twister` @
+[`1.1.1`](https://github.com/dcrewi/rust-mersenne-twister/tree/1.1.1) which is
+Copyright (c) 2015 rust-mersenne-twister developers.
