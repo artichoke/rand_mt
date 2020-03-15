@@ -11,6 +11,7 @@
 
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
+#![deny(clippy::cargo)]
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]

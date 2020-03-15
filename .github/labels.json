@@ -25,6 +25,11 @@
     "description": "Area: Infrastructure for running an open source project."
   },
   {
+    "name": "A-release",
+    "color": "f7e101",
+    "description": "Area: crates.io releases and version bumps."
+  },
+  {
     "name": "C-bug",
     "color": "c1c8ff",
     "description": "Category: This is a bug."
