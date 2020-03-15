@@ -3,6 +3,7 @@ name = "rand_mt"
 version = "2.0.0-dev"
 authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
 license = "MIT OR Apache-2.0"
+edition = "2018"
 readme = "README.md"
 repository = "https://github.com/artichoke/rand_mt"
 documentation = "https://artichoke.github.io/rand_mt/rand_mt/"
@@ -18,4 +19,8 @@ include = [
 ]
 
 [dependencies]
-rand = ">=0.3, <0.5"
+rand_core = "0.5"
+
+[dev-dependencies]
+quickcheck = { version = "0.9", default-features = false }
+quickcheck_macros = "0.9"

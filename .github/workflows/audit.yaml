@@ -1,0 +1,41 @@
+name: Audit
+on:
+  push:
+  schedule:
+    - cron: "0 0 * * 2" # midnight on Tuesday
+jobs:
+  rust:
+    name: Audit Rust Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Fetch cargo-audit
+        run: |
+          curl -sL "$RELEASE" | sudo tar xvz -C /usr/local/bin/ --strip-components=1
+        env:
+          RELEASE: "https://github.com/EmbarkStudios/cargo-deny/releases/download/0.6.6/cargo-deny-0.6.6-x86_64-unknown-linux-musl.tar.gz"
+
+      - name: Run cargo-deny
+        run: cargo-deny check
+
+  js:
+    name: Audit JS Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Node toolchain
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: Install Nodejs toolchain
+        run: yarn install --frozen-lockfile
+
+      - name: Yarn audit
+        run: yarn audit

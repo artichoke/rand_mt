@@ -9,6 +9,12 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+#![deny(missing_docs, intra_doc_link_resolution_failure)]
+#![warn(rust_2018_idioms)]
+#![forbid(unsafe_code)]
+
 //! # Mersenne Twister
 //!
 //! A pure rust port of the Mersenne Twister pseudorandom number
@@ -29,19 +35,18 @@
 //! definition. Either flavor accepts a `u64` seed.
 //!
 //! ```
-//! extern crate rand_mt;
-//! extern crate rand;
-//! use rand_mt::MersenneTwister;
-//! use rand::{Rng, SeedableRng};
-//!
-//! fn main() {
-//!     // Get a seed somehow.
-//!     let seed: u64 = 0x123456789abcdef;
-//!     // Create the default RNG.
-//!     let mut rng: MersenneTwister = SeedableRng::from_seed(seed);
-//!
-//!     // start grabbing randomness from rng...
-//! }
+//! # use rand_mt::MersenneTwister;
+//! # use rand_core::{RngCore, SeedableRng};
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! // Get a seed somehow.
+//! let seed: [u8; 8] = 0x1234_567_89ab_cdef_u64.to_ne_bytes();
+//! // Create the default RNG.
+//! let mut rng = MersenneTwister::from_seed(seed);
+//! // start grabbing randomness from rng...
+//! let mut buf = vec![0; 512];
+//! rng.try_fill_bytes(&mut buf)?;
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Or if you want to use the default (fixed) seeds that are specified
@@ -63,14 +68,13 @@
 
 #![deny(missing_docs)]
 
-extern crate rand;
-
-pub use mt19937::MT19937;
-pub use mt19937_64::MT19937_64;
+pub use crate::mt19937::MT19937;
+pub use crate::mt19937_64::MT19937_64;
 
 mod mt19937;
 mod mt19937_64;
-
+#[cfg(test)]
+mod vectors;
 
 /// The most platform-appropriate Mersenne Twister flavor.
 #[cfg(target_pointer_width = "32")]
