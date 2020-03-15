@@ -137,21 +137,18 @@ impl RngCore for MT19937_64 {
     /// ```
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         let mut bytes_written = 0;
-        loop {
-            if bytes_written >= dest.len() {
-                break;
-            }
+        'write: loop {
             let bytes = self.next_u64().to_le_bytes();
-            if let Some(slice) = dest.get_mut(bytes_written..bytes_written + 8) {
+            if let Some(slice) = dest.get_mut(bytes_written..bytes_written + bytes.len()) {
                 slice.copy_from_slice(&bytes[..]);
-                bytes_written += 8;
+                bytes_written += bytes.len();
             } else {
                 for byte in bytes.iter().copied() {
                     if let Some(cell) = dest.get_mut(bytes_written) {
                         *cell = byte;
                         bytes_written += 1;
                     } else {
-                        break;
+                        break 'write;
                     }
                 }
             }
@@ -190,16 +187,58 @@ impl RngCore for MT19937_64 {
 }
 
 impl MT19937_64 {
+    /// Default seed used by [`MT19937_64::new_unseeded`].
+    pub const DEFAULT_SEED: u64 = 5489_u64;
+
     /// Generate an `MT19937` with zeroed state.
     fn uninitialized() -> Self {
         Self {
             idx: 0,
-            state: vec![Wrapping(0); NN].into_boxed_slice(),
+            state: Box::new([Wrapping(0); NN]),
         }
     }
 
-    /// Create a new Mersenne Twister random number generator using
-    /// the default fixed seed.
+    /// Create a new Mersenne Twister random number generator using the given
+    /// seed.
+    ///
+    /// # Examples
+    ///
+    /// ## Constructing with a `u64` seed
+    ///
+    /// ```
+    /// # use rand_core::SeedableRng;
+    /// # use rand_mt::MT19937_64;
+    /// let seed = 123_456_789_u64;
+    /// let mt1 = MT19937_64::new(seed);
+    /// let mt2 = MT19937_64::from_seed(seed.to_le_bytes());
+    /// assert_eq!(mt1, mt2);
+    /// ```
+    ///
+    /// ## Constructing with default seed
+    ///
+    /// ```
+    /// # use rand_mt::MT19937_64;
+    /// let mt1 = MT19937_64::new(MT19937_64::DEFAULT_SEED);
+    /// let mt2 = MT19937_64::new_unseeded();
+    /// assert_eq!(mt1, mt2);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn new(seed: u64) -> Self {
+        Self::from_seed(seed.to_le_bytes())
+    }
+
+    /// Create a new Mersenne Twister random number generator using the given
+    /// key.
+    #[must_use]
+    pub fn new_from_slice(key: &[u64]) -> Self {
+        let mut mt = Self::uninitialized();
+        mt.reseed_from_slice(key);
+        mt
+    }
+
+    /// Create a new Mersenne Twister random number generator using the default
+    /// fixed seed.
     ///
     /// # Examples
     ///
@@ -215,7 +254,7 @@ impl MT19937_64 {
     #[inline]
     #[must_use]
     pub fn new_unseeded() -> Self {
-        Self::from_seed(5489_u64.to_le_bytes())
+        Self::from_seed(Self::DEFAULT_SEED.to_le_bytes())
     }
 
     fn fill_next_state(&mut self) {
@@ -290,11 +329,11 @@ impl MT19937_64 {
                 + Wrapping(key[j])
                 + Wrapping(j as u64);
             i += 1;
+            j += 1;
             if i >= NN {
                 self.state[0] = self.state[NN - 1];
                 i = 1;
             }
-            j += 1;
             if j >= key.len() {
                 j = 0;
             }
@@ -344,6 +383,9 @@ fn untemper(mut x: u64) -> u64 {
 }
 
 impl Default for MT19937_64 {
+    /// Return a new `MT19937_64` with the default seed.
+    ///
+    /// Equivalent to calling [`MT19937_64::new_unseeded`].
     #[inline]
     fn default() -> MT19937_64 {
         MT19937_64::new_unseeded()
