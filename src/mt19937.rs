@@ -483,12 +483,12 @@ mod tests {
         for _ in 0..skip {
             orig_mt.next_u32();
         }
-        let mut samples = [0; super::N];
+        let mut samples = [0; 624];
         for sample in samples.iter_mut() {
             *sample = orig_mt.next_u32();
         }
         let mut recovered_mt = MT19937::recover(&samples[..]).unwrap();
-        for _ in 0..super::N * 2 {
+        for _ in 0..624 * 2 {
             if orig_mt.next_u32() != recovered_mt.next_u32() {
                 return false;
             }
