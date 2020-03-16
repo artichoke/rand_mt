@@ -178,22 +178,17 @@ impl RngCore for MT19937 {
     /// assert_ne!([0; 31], buf);
     /// ```
     fn fill_bytes(&mut self, dest: &mut [u8]) {
-        let mut bytes_written = 0;
-        'write: loop {
-            let bytes = self.next_u32().to_le_bytes();
-            if let Some(slice) = dest.get_mut(bytes_written..bytes_written + bytes.len()) {
-                slice.copy_from_slice(&bytes[..]);
-                bytes_written += bytes.len();
-            } else {
-                for byte in bytes.iter().copied() {
-                    if let Some(cell) = dest.get_mut(bytes_written) {
-                        *cell = byte;
-                        bytes_written += 1;
-                    } else {
-                        break 'write;
-                    }
-                }
-            }
+        let mut left = dest;
+        while left.len() >= 4 {
+            let (l, r) = left.split_at_mut(4);
+            left = r;
+            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
+            l.copy_from_slice(&chunk);
+        }
+        let n = left.len();
+        if n > 0 {
+            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
+            left.copy_from_slice(&chunk[..n]);
         }
     }
 
