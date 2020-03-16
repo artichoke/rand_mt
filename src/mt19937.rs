@@ -36,8 +36,8 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 /// `MT19937` is also the same size as [`MT19937_64`](crate::MT19937_64).
 ///
 /// ```
+/// # use core::mem;
 /// # use rand_mt::{MT19937, MT19937_64};
-/// # use std::mem;
 /// assert_eq!(2504, mem::size_of::<MT19937>());
 /// assert_eq!(mem::size_of::<MT19937_64>(), mem::size_of::<MT19937>());
 /// ```
@@ -438,9 +438,9 @@ impl Default for MT19937 {
 
 #[cfg(test)]
 mod tests {
+    use core::num::Wrapping;
     use quickcheck_macros::quickcheck;
     use rand_core::{RngCore, SeedableRng};
-    use std::num::Wrapping;
 
     use super::MT19937;
     use crate::vectors::mt as vectors;
@@ -483,9 +483,9 @@ mod tests {
         for _ in 0..skip {
             orig_mt.next_u32();
         }
-        let mut samples = Vec::with_capacity(super::N);
-        for _ in 0..super::N {
-            samples.push(orig_mt.next_u32());
+        let mut samples = [0; super::N];
+        for sample in samples.iter_mut() {
+            *sample = orig_mt.next_u32();
         }
         let mut recovered_mt = MT19937::recover(&samples[..]).unwrap();
         for _ in 0..super::N * 2 {

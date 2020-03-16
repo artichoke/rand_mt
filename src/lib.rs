@@ -16,7 +16,7 @@
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
 #![forbid(unsafe_code)]
-#![cfg_attr(not(any(doctest, test)), no_std)]
+#![no_std]
 
 //! Mersenne Twister random number generators.
 //!
