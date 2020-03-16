@@ -36,8 +36,8 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 /// `MT19937_64` is also the same size as [`MT19937`](crate::MT19937).
 ///
 /// ```
+/// # use core::mem;
 /// # use rand_mt::{MT19937, MT19937_64};
-/// # use std::mem;
 /// assert_eq!(2504, mem::size_of::<MT19937_64>());
 /// assert_eq!(mem::size_of::<MT19937>(), mem::size_of::<MT19937_64>());
 /// ```
@@ -436,9 +436,9 @@ impl Default for MT19937_64 {
 
 #[cfg(test)]
 mod tests {
+    use core::num::Wrapping;
     use quickcheck_macros::quickcheck;
     use rand_core::{RngCore, SeedableRng};
-    use std::num::Wrapping;
 
     use super::MT19937_64;
     use crate::vectors::mt64 as vectors;
@@ -481,12 +481,12 @@ mod tests {
         for _ in 0..skip {
             orig_mt.next_u64();
         }
-        let mut samples = Vec::with_capacity(super::NN);
-        for _ in 0..super::NN {
-            samples.push(orig_mt.next_u64());
+        let mut samples = [0; 312];
+        for sample in samples.iter_mut() {
+            *sample = orig_mt.next_u64();
         }
         let mut recovered_mt = MT19937_64::recover(&samples[..]).unwrap();
-        for _ in 0..super::NN * 2 {
+        for _ in 0..312 * 2 {
             if orig_mt.next_u64() != recovered_mt.next_u64() {
                 return false;
             }
