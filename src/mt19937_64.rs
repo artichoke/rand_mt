@@ -50,10 +50,7 @@ pub struct MT19937_64 {
 
 impl fmt::Debug for MT19937_64 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("MT19937_64")
-            .field("idx", &self.idx)
-            .field("state", &&self.state[..])
-            .finish()
+        f.debug_struct("MT19937_64").finish()
     }
 }
 
