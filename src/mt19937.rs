@@ -446,39 +446,44 @@ mod tests {
     use crate::vectors::mt as vectors;
 
     #[test]
-    fn test_32bit_seeded() {
-        let mt = MT19937::from_seed(0x1234_5678_u32.to_le_bytes());
+    fn seeded_state_from_u32_seed() {
+        let mt = MT19937::new(0x1234_5678_u32);
+        let mt_from_seed = MT19937::from_seed(0x1234_5678_u32.to_le_bytes());
+        assert!(mt.state[..] == mt_from_seed.state[..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U32.iter()) {
             assert!(x == y);
         }
     }
 
     #[test]
-    fn test_32bit_slice_seeded() {
-        let mut mt = MT19937::default();
-        mt.reseed_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
+    fn seeded_state_from_u32_slice_key() {
+        let mt = MT19937::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
     }
 
     #[test]
-    fn test_32bit_output() {
-        let mut mt = MT19937::default();
-        mt.reseed_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
+    fn output_from_u32_slice_key() {
+        let mut mt = MT19937::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u32() == *x);
         }
     }
 
     #[quickcheck]
-    fn test_untemper(x: u32) -> bool {
+    fn temper_untemper_is_identity(x: u32) -> bool {
         x == super::untemper(super::temper(x))
     }
 
     #[quickcheck]
-    fn test_recovery(seed: u32, skip: u8) -> bool {
-        let mut orig_mt = MT19937::from_seed(seed.to_le_bytes());
+    fn untemper_temper_is_identity(x: u32) -> bool {
+        x == super::temper(super::untemper(x))
+    }
+
+    #[quickcheck]
+    fn recovery(seed: u32, skip: u8) -> bool {
+        let mut orig_mt = MT19937::new(seed);
         // skip some samples so the RNG is in an intermediate state
         for _ in 0..skip {
             orig_mt.next_u32();
