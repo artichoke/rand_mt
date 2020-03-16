@@ -444,39 +444,46 @@ mod tests {
     use crate::vectors::mt64 as vectors;
 
     #[test]
-    fn test_64bit_seeded() {
-        let mt = MT19937_64::from_seed(0x0123_4567_89ab_cdef_u64.to_le_bytes());
+    fn seeded_state_from_u64_seed() {
+        let mt = MT19937_64::new(0x0123_4567_89ab_cdef_u64);
+        let mt_from_seed = MT19937_64::from_seed(0x0123_4567_89ab_cdef_u64.to_le_bytes());
+        assert!(mt.state[..] == mt_from_seed.state[..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U64.iter()) {
             assert!(x == y);
         }
     }
 
     #[test]
-    fn test_64bit_slice_seeded() {
-        let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
+    fn seeded_state_from_u64_slice_key() {
+        let mt =
+            MT19937_64::new_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
     }
 
     #[test]
-    fn test_64bit_output() {
-        let mut mt = MT19937_64::default();
-        mt.reseed_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
+    fn output_from_u64_slice_key() {
+        let mut mt =
+            MT19937_64::new_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u64() == *x);
         }
     }
 
     #[quickcheck]
-    fn test_untemper(x: u64) -> bool {
+    fn temper_untemper_is_identity(x: u64) -> bool {
         x == super::untemper(super::temper(x))
     }
 
     #[quickcheck]
-    fn test_recovery(seed: u64, skip: u8) -> bool {
-        let mut orig_mt = MT19937_64::from_seed(seed.to_le_bytes());
+    fn untemper_temper_is_identity(x: u64) -> bool {
+        x == super::temper(super::untemper(x))
+    }
+
+    #[quickcheck]
+    fn recovery(seed: u64, skip: u8) -> bool {
+        let mut orig_mt = MT19937_64::new(seed);
         // skip some samples so the RNG is in an intermediate state
         for _ in 0..skip {
             orig_mt.next_u64();
