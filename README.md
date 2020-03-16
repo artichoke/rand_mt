@@ -4,7 +4,9 @@
 [![Discord](https://img.shields.io/discord/607683947496734760)](https://discord.gg/QCe2tp2)
 [![Twitter](https://img.shields.io/twitter/follow/artichokeruby?label=Follow&style=social)](https://twitter.com/artichokeruby)
 <br>
-[![rand_mt documentation](https://img.shields.io/badge/docs-rand__mt-blue.svg)](https://artichoke.github.io/rand_mt/rand_mt/)
+[![Crate](https://img.shields.io/crates/v/rand_mt.svg)](https://crates.io/crates/rand_mt)
+[![API](https://docs.rs/rand_mt/badge.svg)](https://docs.rs/rand_mt)
+[![API master](https://img.shields.io/badge/docs-master-blue.svg)](https://artichoke.github.io/rand_mt/rand_mt/)
 
 Implemenents a selection of Mersenne Twister random number generators.
 
