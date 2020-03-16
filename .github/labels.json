@@ -20,6 +20,11 @@
     "description": "Area: Source and library dependencies."
   },
   {
+    "name": "A-performance",
+    "color": "f7e101",
+    "description": "Area: Performance improvements and optimizations."
+  },
+  {
     "name": "A-project",
     "color": "f7e101",
     "description": "Area: Infrastructure for running an open source project."
