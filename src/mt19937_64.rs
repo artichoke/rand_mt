@@ -322,20 +322,42 @@ impl MT19937_64 {
     /// reproduce subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 312 elements.
+    #[inline]
     #[must_use]
     pub fn recover(samples: &[u64]) -> Option<Self> {
-        if samples.len() != NN {
-            return None;
-        }
+        Self::recover_from_iter(samples.iter().copied())
+    }
+
+    /// Recover the internal state of a Mersenne Twister instance
+    /// from 312 consecutive outputs of the algorithm.
+    ///
+    /// The returned `MT19937_64` is guaranteed to identically
+    /// reproduce subsequent outputs of the RNG that was sampled.
+    ///
+    /// Returns `None` if `samples` is not exactly 312 elements.
+    #[must_use]
+    pub fn recover_from_iter<I>(samples: I) -> Option<Self>
+    where
+        I: IntoIterator<Item = u64>,
+    {
         let mut mt = Self {
-            idx: 0,
+            idx: NN,
             state: [Wrapping(0); NN],
         };
-        for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
-            *out = Wrapping(untemper(in_));
+        let mut samples = samples.into_iter();
+        let mut state = mt.state.iter_mut();
+        while let Some(sample) = samples.next() {
+            let out = state.next()?; // Too many samples
+            *out = Wrapping(untemper(sample));
         }
-        mt.idx = NN;
-        Some(mt)
+        // If the state iterator still has unfilled cells, the given iterator
+        // was too short. If there are no additional cells, return the
+        // initialized RNG.
+        if state.next().is_none() {
+            Some(mt)
+        } else {
+            None
+        }
     }
 
     /// Reseed a Mersenne Twister from a single `u64`.
