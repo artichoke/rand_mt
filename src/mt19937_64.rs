@@ -511,4 +511,16 @@ mod tests {
         }
         true
     }
+
+    #[test]
+    fn recover_required_exact_sample_length() {
+        let samples = [0; 0];
+        assert_eq!(None, MT19937_64::recover(&samples));
+        let samples = [0; 1];
+        assert_eq!(None, MT19937_64::recover(&samples));
+        let samples = [0; 313];
+        assert_eq!(None, MT19937_64::recover(&samples));
+        let samples = [0; 1000];
+        assert_eq!(None, MT19937_64::recover(&samples));
+    }
 }
