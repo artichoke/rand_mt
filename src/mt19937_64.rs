@@ -101,9 +101,7 @@ impl SeedableRng for MT19937_64 {
     /// ```
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
-        let mut mt = Self::uninitialized();
-        mt.reseed(u64::from_le_bytes(seed));
-        mt
+        Self::new(u64::from_le_bytes(seed))
     }
 }
 
@@ -224,14 +222,6 @@ impl MT19937_64 {
     /// Default seed used by [`MT19937_64::new_unseeded`].
     pub const DEFAULT_SEED: u64 = 5489_u64;
 
-    /// Generate an `MT19937` with zeroed state.
-    fn uninitialized() -> Self {
-        Self {
-            idx: 0,
-            state: [Wrapping(0); NN],
-        }
-    }
-
     /// Create a new Mersenne Twister random number generator using the given
     /// seed.
     ///
@@ -259,7 +249,12 @@ impl MT19937_64 {
     #[inline]
     #[must_use]
     pub fn new(seed: u64) -> Self {
-        Self::from_seed(seed.to_le_bytes())
+        let mut mt = Self {
+            idx: 0,
+            state: [Wrapping(0); NN],
+        };
+        mt.reseed(seed);
+        mt
     }
 
     /// Create a new Mersenne Twister random number generator using the given
@@ -278,7 +273,10 @@ impl MT19937_64 {
         I: IntoIterator<Item = u64>,
         I::IntoIter: Clone,
     {
-        let mut mt = Self::uninitialized();
+        let mut mt = Self {
+            idx: 0,
+            state: [Wrapping(0); NN],
+        };
         mt.reseed_from_iter(key);
         mt
     }
@@ -329,7 +327,10 @@ impl MT19937_64 {
         if samples.len() != NN {
             return None;
         }
-        let mut mt = Self::uninitialized();
+        let mut mt = Self {
+            idx: 0,
+            state: [Wrapping(0); NN],
+        };
         for (in_, out) in Iterator::zip(samples.iter().copied(), mt.state.iter_mut()) {
             *out = Wrapping(untemper(in_));
         }
