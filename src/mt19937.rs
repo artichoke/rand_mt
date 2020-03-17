@@ -49,7 +49,7 @@ pub struct MT19937 {
 
 impl fmt::Debug for MT19937 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("MT19937").finish()
+        write!(f, "MT19937 {{}}")
     }
 }
 
