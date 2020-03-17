@@ -77,7 +77,7 @@ impl cmp::PartialOrd for MT19937_64 {
 
 impl cmp::Ord for MT19937_64 {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
-        match (&self.state[..]).cmp(&other.state[..]) {
+        match self.state[..].cmp(&other.state[..]) {
             cmp::Ordering::Equal => self.idx.cmp(&other.idx),
             ordering => ordering,
         }
@@ -290,15 +290,15 @@ impl MT19937_64 {
     /// # use rand_core::SeedableRng;
     /// # use rand_mt::MT19937_64;
     /// // Default MT seed
-    /// let seed = 5489_u64.to_le_bytes();
-    /// let mt = MT19937_64::from_seed(seed);
+    /// let seed = 5489_u64;
+    /// let mt = MT19937_64::new(seed);
     /// let unseeded = MT19937_64::new_unseeded();
     /// assert_eq!(mt, unseeded);
     /// ```
     #[inline]
     #[must_use]
     pub fn new_unseeded() -> Self {
-        Self::from_seed(Self::DEFAULT_SEED.to_le_bytes())
+        Self::new(Self::DEFAULT_SEED)
     }
 
     fn fill_next_state(&mut self) {
@@ -367,8 +367,7 @@ impl MT19937_64 {
     /// # use rand_core::{RngCore, SeedableRng};
     /// # use rand_mt::MT19937_64;
     /// // Default MT seed
-    /// let seed = 5489_u64.to_le_bytes();
-    /// let mut mt = MT19937_64::from_seed(seed);
+    /// let mut mt = MT19937_64::new_unseeded();
     /// let first = mt.next_u64();
     /// mt.fill_bytes(&mut [0; 512]);
     /// // Default MT seed
@@ -391,7 +390,7 @@ impl MT19937_64 {
         self.reseed_from_iter(key.iter().copied())
     }
 
-    /// Reseed a Mersenne Twister from am iterator of `u32`s.
+    /// Reseed a Mersenne Twister from am iterator of `u64`s.
     #[allow(clippy::cast_possible_truncation)]
     pub fn reseed_from_iter<I>(&mut self, key: I)
     where

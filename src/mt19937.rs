@@ -76,7 +76,7 @@ impl cmp::PartialOrd for MT19937 {
 
 impl cmp::Ord for MT19937 {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
-        match (&self.state[..]).cmp(&other.state[..]) {
+        match self.state[..].cmp(&other.state[..]) {
             cmp::Ordering::Equal => self.idx.cmp(&other.idx),
             ordering => ordering,
         }
@@ -290,15 +290,15 @@ impl MT19937 {
     /// # use rand_core::SeedableRng;
     /// # use rand_mt::MT19937;
     /// // Default MT seed
-    /// let seed = 5489_u32.to_le_bytes();
-    /// let mt = MT19937::from_seed(seed);
+    /// let seed = 5489_u32;
+    /// let mt = MT19937::new(seed);
     /// let unseeded = MT19937::new_unseeded();
     /// assert_eq!(mt, unseeded);
     /// ```
     #[inline]
     #[must_use]
     pub fn new_unseeded() -> Self {
-        Self::from_seed(Self::DEFAULT_SEED.to_le_bytes())
+        Self::new(Self::DEFAULT_SEED)
     }
 
     fn fill_next_state(&mut self) {
@@ -367,8 +367,7 @@ impl MT19937 {
     /// # use rand_core::{RngCore, SeedableRng};
     /// # use rand_mt::MT19937;
     /// // Default MT seed
-    /// let seed = 5489_u32.to_le_bytes();
-    /// let mut mt = MT19937::from_seed(seed);
+    /// let mut mt = MT19937::new_unseeded();
     /// let first = mt.next_u32();
     /// mt.fill_bytes(&mut [0; 512]);
     /// // Default MT seed
