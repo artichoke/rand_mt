@@ -344,9 +344,8 @@ impl MT19937_64 {
             idx: NN,
             state: [Wrapping(0); NN],
         };
-        let mut samples = samples.into_iter();
         let mut state = mt.state.iter_mut();
-        while let Some(sample) = samples.next() {
+        for sample in samples {
             let out = state.next()?; // Too many samples
             *out = Wrapping(untemper(sample));
         }
