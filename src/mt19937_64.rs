@@ -97,7 +97,7 @@ impl SeedableRng for MT19937_64 {
     /// // Default MT seed
     /// let seed = 5489_u64.to_le_bytes();
     /// let mut mt = MT19937_64::from_seed(seed);
-    /// assert_ne!(mt.next_u32(), mt.next_u32());
+    /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
     fn from_seed(seed: Self::Seed) -> Self {
