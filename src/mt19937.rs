@@ -264,10 +264,22 @@ impl MT19937 {
 
     /// Create a new Mersenne Twister random number generator using the given
     /// key.
+    #[inline]
     #[must_use]
     pub fn new_from_slice(key: &[u32]) -> Self {
+        Self::new_from_iter(key.iter().copied())
+    }
+
+    /// Create a new Mersenne Twister random number generator using the given
+    /// key.
+    #[must_use]
+    pub fn new_from_iter<I>(key: I) -> Self
+    where
+        I: IntoIterator<Item = u32>,
+        I::IntoIter: Clone,
+    {
         let mut mt = Self::uninitialized();
-        mt.reseed_from_slice(key);
+        mt.reseed_from_iter(key);
         mt
     }
 
@@ -352,25 +364,30 @@ impl MT19937 {
         }
     }
 
-    /// Reseed a Mersenne Twister from a sequence of `u32`s.
-    #[allow(clippy::cast_possible_truncation)]
+    /// Reseed a Mersenne Twister from a slice of `u32`s.
+    #[inline]
     pub fn reseed_from_slice(&mut self, key: &[u32]) {
+        self.reseed_from_iter(key.iter().copied())
+    }
+
+    /// Reseed a Mersenne Twister from am iterator of `u32`s.
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn reseed_from_iter<I>(&mut self, key: I)
+    where
+        I: IntoIterator<Item = u32>,
+        I::IntoIter: Clone,
+    {
         self.reseed(19_650_218_u32);
         let mut i = 1_usize;
-        let mut j = 0_usize;
-        for _ in 0..cmp::max(N, key.len()) {
+        for (j, piece) in key.into_iter().enumerate().cycle().take(N) {
             self.state[i] = (self.state[i]
                 ^ ((self.state[i - 1] ^ (self.state[i - 1] >> 30)) * Wrapping(1_664_525)))
-                + Wrapping(key[j])
+                + Wrapping(piece)
                 + Wrapping(j as u32);
             i += 1;
-            j += 1;
             if i >= N {
                 self.state[0] = self.state[N - 1];
                 i = 1;
-            }
-            if j >= key.len() {
-                j = 0;
             }
         }
         for _ in 0..N - 1 {
