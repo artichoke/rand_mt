@@ -47,9 +47,26 @@ pub struct MT19937 {
     state: [Wrapping<u32>; N],
 }
 
-impl fmt::Debug for MT19937 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "MT19937 {{}}")
+impl cmp::Eq for MT19937 {}
+
+impl cmp::PartialEq for MT19937 {
+    fn eq(&self, other: &Self) -> bool {
+        self.state[..] == other.state[..] && self.idx == other.idx
+    }
+}
+
+impl cmp::Ord for MT19937 {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        match self.state[..].cmp(&other.state[..]) {
+            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
+            ordering => ordering,
+        }
+    }
+}
+
+impl cmp::PartialOrd for MT19937 {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -60,26 +77,19 @@ impl hash::Hash for MT19937 {
     }
 }
 
-impl cmp::PartialEq for MT19937 {
-    fn eq(&self, other: &Self) -> bool {
-        self.state[..] == other.state[..] && self.idx == other.idx
+impl fmt::Debug for MT19937 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "MT19937 {{}}")
     }
 }
 
-impl cmp::Eq for MT19937 {}
-
-impl cmp::PartialOrd for MT19937 {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl cmp::Ord for MT19937 {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
-        match self.state[..].cmp(&other.state[..]) {
-            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
-            ordering => ordering,
-        }
+impl Default for MT19937 {
+    /// Return a new `MT19937` with the default seed.
+    ///
+    /// Equivalent to calling [`MT19937::new_unseeded`].
+    #[inline]
+    fn default() -> Self {
+        Self::new_unseeded()
     }
 }
 
@@ -454,16 +464,6 @@ fn untemper(mut x: u32) -> u32 {
     x ^= x >> 22;
 
     x
-}
-
-impl Default for MT19937 {
-    /// Return a new `MT19937` with the default seed.
-    ///
-    /// Equivalent to calling [`MT19937::new_unseeded`].
-    #[inline]
-    fn default() -> Self {
-        Self::new_unseeded()
-    }
 }
 
 #[cfg(test)]
