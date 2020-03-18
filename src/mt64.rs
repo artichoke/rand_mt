@@ -28,35 +28,35 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 ///
 /// # Size
 ///
-/// `MT19937_64` requires approximately 2.5KB of internal state.
+/// `Mt19937GenRand64` requires approximately 2.5KB of internal state.
 ///
-/// You may wish to store an `MT19937_64` on the heap in a `Box` to make it
+/// You may wish to store an `Mt19937GenRand64` on the heap in a `Box` to make it
 /// easier to embed in another struct.
 ///
-/// `MT19937_64` is also the same size as [`MT19937`](crate::MT19937).
+/// `Mt19937GenRand64` is also the same size as
+/// [`Mt19937GenRand32`](crate::Mt19937GenRand32).
 ///
 /// ```
 /// # use core::mem;
-/// # use rand_mt::{MT19937, MT19937_64};
-/// assert_eq!(2504, mem::size_of::<MT19937_64>());
-/// assert_eq!(mem::size_of::<MT19937>(), mem::size_of::<MT19937_64>());
+/// # use rand_mt::{Mt19937GenRand32, Mt19937GenRand64};
+/// assert_eq!(2504, mem::size_of::<Mt19937GenRand64>());
+/// assert_eq!(mem::size_of::<Mt19937GenRand32>(), mem::size_of::<Mt19937GenRand64>());
 /// ```
-#[allow(non_camel_case_types)]
 #[derive(Clone)]
-pub struct MT19937_64 {
+pub struct Mt19937GenRand64 {
     idx: usize,
     state: [Wrapping<u64>; NN],
 }
 
-impl cmp::Eq for MT19937_64 {}
+impl cmp::Eq for Mt19937GenRand64 {}
 
-impl cmp::PartialEq for MT19937_64 {
+impl cmp::PartialEq for Mt19937GenRand64 {
     fn eq(&self, other: &Self) -> bool {
         self.state[..] == other.state[..] && self.idx == other.idx
     }
 }
 
-impl cmp::Ord for MT19937_64 {
+impl cmp::Ord for Mt19937GenRand64 {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         match self.state[..].cmp(&other.state[..]) {
             cmp::Ordering::Equal => self.idx.cmp(&other.idx),
@@ -65,36 +65,36 @@ impl cmp::Ord for MT19937_64 {
     }
 }
 
-impl cmp::PartialOrd for MT19937_64 {
+impl cmp::PartialOrd for Mt19937GenRand64 {
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl hash::Hash for MT19937_64 {
+impl hash::Hash for Mt19937GenRand64 {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.idx.hash(state);
         self.state.hash(state);
     }
 }
 
-impl fmt::Debug for MT19937_64 {
+impl fmt::Debug for Mt19937GenRand64 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "MT19937_64 {{}}")
+        write!(f, "Mt19937GenRand64 {{}}")
     }
 }
 
-impl Default for MT19937_64 {
-    /// Return a new `MT19937_64` with the default seed.
+impl Default for Mt19937GenRand64 {
+    /// Return a new `Mt19937GenRand64` with the default seed.
     ///
-    /// Equivalent to calling [`MT19937_64::new_unseeded`].
+    /// Equivalent to calling [`Mt19937GenRand64::new_unseeded`].
     #[inline]
     fn default() -> Self {
         Self::new_unseeded()
     }
 }
 
-impl SeedableRng for MT19937_64 {
+impl SeedableRng for Mt19937GenRand64 {
     type Seed = [u8; 8];
 
     /// Reseed from a little endian encoded `u64`.
@@ -103,10 +103,10 @@ impl SeedableRng for MT19937_64 {
     ///
     /// ```
     /// # use rand_core::{RngCore, SeedableRng};
-    /// # use rand_mt::MT19937_64;
+    /// # use rand_mt::Mt19937GenRand64;
     /// // Default MT seed
     /// let seed = 5489_u64.to_le_bytes();
-    /// let mut mt = MT19937_64::from_seed(seed);
+    /// let mut mt = Mt19937GenRand64::from_seed(seed);
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
@@ -115,7 +115,7 @@ impl SeedableRng for MT19937_64 {
     }
 }
 
-impl RngCore for MT19937_64 {
+impl RngCore for Mt19937GenRand64 {
     /// Generate next `u64` output.
     ///
     /// `u64` is the native output of the generator. This function advances the
@@ -125,8 +125,8 @@ impl RngCore for MT19937_64 {
     ///
     /// ```
     /// # use rand_core::RngCore;
-    /// # use rand_mt::MT19937_64;
-    /// let mut mt = MT19937_64::new_unseeded();
+    /// # use rand_mt::Mt19937GenRand64;
+    /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
@@ -151,8 +151,8 @@ impl RngCore for MT19937_64 {
     ///
     /// ```
     /// # use rand_core::RngCore;
-    /// # use rand_mt::MT19937_64;
-    /// let mut mt = MT19937_64::new_unseeded();
+    /// # use rand_mt::Mt19937GenRand64;
+    /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
     #[inline]
@@ -173,8 +173,8 @@ impl RngCore for MT19937_64 {
     ///
     /// ```
     /// # use rand_core::RngCore;
-    /// # use rand_mt::MT19937_64;
-    /// let mut mt = MT19937_64::new_unseeded();
+    /// # use rand_mt::Mt19937GenRand64;
+    /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);
@@ -212,8 +212,8 @@ impl RngCore for MT19937_64 {
     ///
     /// ```
     /// # use rand_core::RngCore;
-    /// # use rand_mt::MT19937_64;
-    /// let mut mt = MT19937_64::new_unseeded();
+    /// # use rand_mt::Mt19937GenRand64;
+    /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.try_fill_bytes(&mut buf).unwrap();
     /// assert_ne!([0; 32], buf);
@@ -228,8 +228,8 @@ impl RngCore for MT19937_64 {
     }
 }
 
-impl MT19937_64 {
-    /// Default seed used by [`MT19937_64::new_unseeded`].
+impl Mt19937GenRand64 {
+    /// Default seed used by [`Mt19937GenRand64::new_unseeded`].
     pub const DEFAULT_SEED: u64 = 5489_u64;
 
     /// Create a new Mersenne Twister random number generator using the given
@@ -241,19 +241,19 @@ impl MT19937_64 {
     ///
     /// ```
     /// # use rand_core::SeedableRng;
-    /// # use rand_mt::MT19937_64;
+    /// # use rand_mt::Mt19937GenRand64;
     /// let seed = 123_456_789_u64;
-    /// let mt1 = MT19937_64::new(seed);
-    /// let mt2 = MT19937_64::from_seed(seed.to_le_bytes());
+    /// let mt1 = Mt19937GenRand64::new(seed);
+    /// let mt2 = Mt19937GenRand64::from_seed(seed.to_le_bytes());
     /// assert_eq!(mt1, mt2);
     /// ```
     ///
     /// ## Constructing with default seed
     ///
     /// ```
-    /// # use rand_mt::MT19937_64;
-    /// let mt1 = MT19937_64::new(MT19937_64::DEFAULT_SEED);
-    /// let mt2 = MT19937_64::new_unseeded();
+    /// # use rand_mt::Mt19937GenRand64;
+    /// let mt1 = Mt19937GenRand64::new(Mt19937GenRand64::DEFAULT_SEED);
+    /// let mt2 = Mt19937GenRand64::new_unseeded();
     /// assert_eq!(mt1, mt2);
     /// ```
     #[inline]
@@ -298,11 +298,11 @@ impl MT19937_64 {
     ///
     /// ```
     /// # use rand_core::SeedableRng;
-    /// # use rand_mt::MT19937_64;
+    /// # use rand_mt::Mt19937GenRand64;
     /// // Default MT seed
     /// let seed = 5489_u64;
-    /// let mt = MT19937_64::new(seed);
-    /// let unseeded = MT19937_64::new_unseeded();
+    /// let mt = Mt19937GenRand64::new(seed);
+    /// let unseeded = Mt19937GenRand64::new_unseeded();
     /// assert_eq!(mt, unseeded);
     /// ```
     #[inline]
@@ -328,7 +328,7 @@ impl MT19937_64 {
     /// Recover the internal state of a Mersenne Twister instance
     /// from 312 consecutive outputs of the algorithm.
     ///
-    /// The returned `MT19937_64` is guaranteed to identically
+    /// The returned `Mt19937GenRand64` is guaranteed to identically
     /// reproduce subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 312 elements.
@@ -341,7 +341,7 @@ impl MT19937_64 {
     /// Recover the internal state of a Mersenne Twister instance
     /// from 312 consecutive outputs of the algorithm.
     ///
-    /// The returned `MT19937_64` is guaranteed to identically
+    /// The returned `Mt19937GenRand64` is guaranteed to identically
     /// reproduce subsequent outputs of the RNG that was sampled.
     ///
     /// Returns `None` if `samples` is not exactly 312 elements.
@@ -375,9 +375,9 @@ impl MT19937_64 {
     ///
     /// ```
     /// # use rand_core::{RngCore, SeedableRng};
-    /// # use rand_mt::MT19937_64;
+    /// # use rand_mt::Mt19937GenRand64;
     /// // Default MT seed
-    /// let mut mt = MT19937_64::new_unseeded();
+    /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let first = mt.next_u64();
     /// mt.fill_bytes(&mut [0; 512]);
     /// // Default MT seed
@@ -471,13 +471,13 @@ mod tests {
     use quickcheck_macros::quickcheck;
     use rand_core::{RngCore, SeedableRng};
 
-    use super::MT19937_64;
+    use super::Mt19937GenRand64;
     use crate::vectors::mt64 as vectors;
 
     #[test]
     fn seeded_state_from_u64_seed() {
-        let mt = MT19937_64::new(0x0123_4567_89ab_cdef_u64);
-        let mt_from_seed = MT19937_64::from_seed(0x0123_4567_89ab_cdef_u64.to_le_bytes());
+        let mt = Mt19937GenRand64::new(0x0123_4567_89ab_cdef_u64);
+        let mt_from_seed = Mt19937GenRand64::from_seed(0x0123_4567_89ab_cdef_u64.to_le_bytes());
         assert!(mt.state[..] == mt_from_seed.state[..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U64.iter()) {
             assert!(x == y);
@@ -486,8 +486,9 @@ mod tests {
 
     #[test]
     fn seeded_state_from_u64_slice_key() {
-        let mt =
-            MT19937_64::new_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
+        let mt = Mt19937GenRand64::new_from_slice(
+            &[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..],
+        );
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert!(x == y);
         }
@@ -495,8 +496,9 @@ mod tests {
 
     #[test]
     fn output_from_u64_slice_key() {
-        let mut mt =
-            MT19937_64::new_from_slice(&[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..]);
+        let mut mt = Mt19937GenRand64::new_from_slice(
+            &[0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64][..],
+        );
         for x in vectors::TEST_OUTPUT.iter() {
             assert!(mt.next_u64() == *x);
         }
@@ -514,7 +516,7 @@ mod tests {
 
     #[quickcheck]
     fn recovery(seed: u64, skip: u8) -> bool {
-        let mut orig_mt = MT19937_64::new(seed);
+        let mut orig_mt = Mt19937GenRand64::new(seed);
         // skip some samples so the RNG is in an intermediate state
         for _ in 0..skip {
             orig_mt.next_u64();
@@ -523,7 +525,7 @@ mod tests {
         for sample in samples.iter_mut() {
             *sample = orig_mt.next_u64();
         }
-        let mut recovered_mt = MT19937_64::recover(&samples[..]).unwrap();
+        let mut recovered_mt = Mt19937GenRand64::recover(&samples[..]).unwrap();
         for _ in 0..312 * 2 {
             if orig_mt.next_u64() != recovered_mt.next_u64() {
                 return false;
@@ -534,9 +536,9 @@ mod tests {
 
     #[test]
     fn recover_required_exact_sample_length() {
-        assert_eq!(None, MT19937_64::recover(&[0; 0][..]));
-        assert_eq!(None, MT19937_64::recover(&[0; 1][..]));
-        assert_eq!(None, MT19937_64::recover(&[0; 625][..]));
-        assert_eq!(None, MT19937_64::recover(&[0; 1000][..]));
+        assert_eq!(None, Mt19937GenRand64::recover(&[0; 0][..]));
+        assert_eq!(None, Mt19937GenRand64::recover(&[0; 1][..]));
+        assert_eq!(None, Mt19937GenRand64::recover(&[0; 625][..]));
+        assert_eq!(None, Mt19937GenRand64::recover(&[0; 1000][..]));
     }
 }
