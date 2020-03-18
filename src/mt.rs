@@ -10,11 +10,14 @@
 // modified, or distributed except according to those terms.
 
 use core::cmp;
+use core::convert::TryFrom;
 use core::fmt;
 use core::hash;
 use core::num::Wrapping;
 
 use rand_core::{RngCore, SeedableRng};
+
+use crate::RecoverRngError;
 
 const N: usize = 624;
 const M: usize = 397;
@@ -232,6 +235,51 @@ impl RngCore for Mt19937GenRand32 {
     }
 }
 
+impl From<[u32; N]> for Mt19937GenRand32 {
+    /// Recover the internal state of a Mersenne Twister using the past 624
+    /// samples.
+    ///
+    /// This conversion takes a history of samples from a RNG and returns a
+    /// RNG that will produce identical output to the RNG that supplied the
+    /// samples.
+    fn from(key: [u32; N]) -> Self {
+        let mut mt = Self {
+            idx: N,
+            state: [Wrapping(0); N],
+        };
+        for (sample, out) in key.iter().copied().zip(mt.state.iter_mut()) {
+            *out = Wrapping(untemper(sample));
+        }
+        mt
+    }
+}
+
+impl TryFrom<&[u32]> for Mt19937GenRand32 {
+    type Error = RecoverRngError;
+
+    /// Attempt to recover the internal state of a Mersenne Twister using the
+    /// past 624 samples.
+    ///
+    /// This conversion takes a history of samples from a RNG and returns a
+    /// RNG that will produce identical output to the RNG that supplied the
+    /// samples.
+    ///
+    /// This conversion is implemented with [`Mt19937GenRand32::recover`].
+    ///
+    /// # Errors
+    ///
+    /// If `key` has less than 624 elements, an error is returned because there
+    /// is not enough data to fully initialize the RNG.
+    ///
+    /// If `key` has more than 624 elements, an error is returned because the
+    /// recovered RNG will not produce identical output to the RNG that supplied
+    /// the samples.
+    #[inline]
+    fn try_from(key: &[u32]) -> Result<Self, Self::Error> {
+        Self::recover(key.iter().copied())
+    }
+}
+
 impl Mt19937GenRand32 {
     /// Default seed used by [`Mt19937GenRand32::new_unseeded`].
     pub const DEFAULT_SEED: u32 = 5489_u32;
@@ -329,28 +377,25 @@ impl Mt19937GenRand32 {
         self.idx = 0;
     }
 
-    /// Recover the internal state of a Mersenne Twister instance
-    /// from 624 consecutive outputs of the algorithm.
+    /// Attempt to recover the internal state of a Mersenne Twister using the
+    /// past 624 samples.
     ///
-    /// The returned `Mt19937GenRand32` is guaranteed to identically reproduce
-    /// subsequent outputs of the RNG that was sampled.
+    /// This conversion takes a history of samples from a RNG and returns a
+    /// RNG that will produce identical output to the RNG that supplied the
+    /// samples.
     ///
-    /// Returns `None` if `samples` is not exactly 624 elements.
-    #[inline]
-    #[must_use]
-    pub fn recover(samples: &[u32]) -> Option<Self> {
-        Self::recover_from_iter(samples.iter().copied())
-    }
-
-    /// Recover the internal state of a Mersenne Twister instance
-    /// from 624 consecutive outputs of the algorithm.
+    /// This constructor is also available as a [`TryFrom`] implementation for
+    /// `&[u32]`.
     ///
-    /// The returned `Mt19937GenRand32` is guaranteed to identically reproduce
-    /// subsequent outputs of the RNG that was sampled.
+    /// # Errors
     ///
-    /// Returns `None` if `samples` is not exactly 624 elements.
-    #[must_use]
-    pub fn recover_from_iter<I>(samples: I) -> Option<Self>
+    /// If `key` has less than 624 elements, an error is returned because there
+    /// is not enough data to fully initialize the RNG.
+    ///
+    /// If `key` has more than 624 elements, an error is returned because the
+    /// recovered RNG will not produce identical output to the RNG that supplied
+    /// the samples.
+    pub fn recover<I>(key: I) -> Result<Self, RecoverRngError>
     where
         I: IntoIterator<Item = u32>,
     {
@@ -359,17 +404,17 @@ impl Mt19937GenRand32 {
             state: [Wrapping(0); N],
         };
         let mut state = mt.state.iter_mut();
-        for sample in samples {
-            let out = state.next()?; // Too many samples
+        for sample in key {
+            let out = state.next().ok_or(RecoverRngError::TooManySamples(N))?;
             *out = Wrapping(untemper(sample));
         }
         // If the state iterator still has unfilled cells, the given iterator
         // was too short. If there are no additional cells, return the
         // initialized RNG.
         if state.next().is_none() {
-            Some(mt)
+            Ok(mt)
         } else {
-            None
+            Err(RecoverRngError::TooFewSamples(N))
         }
     }
 
@@ -472,12 +517,14 @@ fn untemper(mut x: u32) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use core::convert::TryFrom;
     use core::num::Wrapping;
     use quickcheck_macros::quickcheck;
     use rand_core::{RngCore, SeedableRng};
 
     use super::Mt19937GenRand32;
     use crate::vectors::mt as vectors;
+    use crate::RecoverRngError;
 
     #[test]
     fn seeded_state_from_u32_seed() {
@@ -485,7 +532,7 @@ mod tests {
         let mt_from_seed = Mt19937GenRand32::from_seed(0x1234_5678_u32.to_le_bytes());
         assert!(mt.state[..] == mt_from_seed.state[..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U32.iter()) {
-            assert!(x == y);
+            assert_eq!(x, y);
         }
     }
 
@@ -494,7 +541,7 @@ mod tests {
         let mt =
             Mt19937GenRand32::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
-            assert!(x == y);
+            assert_eq!(x, y);
         }
     }
 
@@ -502,8 +549,8 @@ mod tests {
     fn output_from_u32_slice_key() {
         let mut mt =
             Mt19937GenRand32::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
-        for x in vectors::TEST_OUTPUT.iter() {
-            assert!(mt.next_u32() == *x);
+        for &x in vectors::TEST_OUTPUT.iter() {
+            assert_eq!(x, mt.next_u32());
         }
     }
 
@@ -528,7 +575,7 @@ mod tests {
         for sample in samples.iter_mut() {
             *sample = orig_mt.next_u32();
         }
-        let mut recovered_mt = Mt19937GenRand32::recover(&samples[..]).unwrap();
+        let mut recovered_mt = Mt19937GenRand32::from(samples);
         for _ in 0..624 * 2 {
             if orig_mt.next_u32() != recovered_mt.next_u32() {
                 return false;
@@ -539,9 +586,21 @@ mod tests {
 
     #[test]
     fn recover_required_exact_sample_length() {
-        assert_eq!(None, Mt19937GenRand32::recover(&[0; 0][..]));
-        assert_eq!(None, Mt19937GenRand32::recover(&[0; 1][..]));
-        assert_eq!(None, Mt19937GenRand32::recover(&[0; 625][..]));
-        assert_eq!(None, Mt19937GenRand32::recover(&[0; 1000][..]));
+        assert_eq!(
+            Err(RecoverRngError::TooFewSamples(super::N)),
+            Mt19937GenRand32::try_from(&[0; 0][..])
+        );
+        assert_eq!(
+            Err(RecoverRngError::TooFewSamples(super::N)),
+            Mt19937GenRand32::try_from(&[0; 1][..])
+        );
+        assert_eq!(
+            Err(RecoverRngError::TooManySamples(super::N)),
+            Mt19937GenRand32::try_from(&[0; 625][..])
+        );
+        assert_eq!(
+            Err(RecoverRngError::TooManySamples(super::N)),
+            Mt19937GenRand32::try_from(&[0; 1000][..])
+        );
     }
 }
