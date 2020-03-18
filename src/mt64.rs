@@ -216,13 +216,16 @@ impl RngCore for Mt19937GenRand64 {
     /// ```
     /// # use rand_core::RngCore;
     /// # use rand_mt::Mt19937GenRand64;
+    /// # fn main() -> Result<(), rand_core::Error> {
     /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let mut buf = [0; 32];
-    /// mt.try_fill_bytes(&mut buf).unwrap();
+    /// mt.try_fill_bytes(&mut buf)?;
     /// assert_ne!([0; 32], buf);
     /// let mut buf = [0; 31];
-    /// mt.try_fill_bytes(&mut buf).unwrap();
+    /// mt.try_fill_bytes(&mut buf)?;
     /// assert_ne!([0; 31], buf);
+    /// # Ok(())
+    /// # }
     /// ```
     #[inline]
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
