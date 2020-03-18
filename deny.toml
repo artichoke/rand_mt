@@ -22,7 +22,12 @@ highlight = "all"
 allow = []
 deny = []
 skip = []
-skip-tree = []
+skip-tree = [
+  { name = "proc-macro2", version = "<1.0" }, # version-check 0.8.1
+  { name = "quote", version = "<1.0" }, # version-check 0.8.1
+  { name = "syn", version = "<1.0" }, # version-check 0.8.1
+  { name = "unicode-xid", version = "<1.0" }, # version-check 0.8.1
+]
 
 [sources]
 unknown-registry = "deny"
