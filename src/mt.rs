@@ -324,16 +324,10 @@ impl Mt19937GenRand32 {
 
     /// Create a new Mersenne Twister random number generator using the given
     /// key.
-    #[inline]
+    ///
+    /// Key can have any length.
     #[must_use]
-    pub fn new_from_slice(key: &[u32]) -> Self {
-        Self::new_from_iter(key.iter().copied())
-    }
-
-    /// Create a new Mersenne Twister random number generator using the given
-    /// key.
-    #[must_use]
-    pub fn new_from_iter<I>(key: I) -> Self
+    pub fn new_with_key<I>(key: I) -> Self
     where
         I: IntoIterator<Item = u32>,
         I::IntoIter: Clone,
@@ -342,7 +336,7 @@ impl Mt19937GenRand32 {
             idx: 0,
             state: [Wrapping(0); N],
         };
-        mt.reseed_from_iter(key);
+        mt.reseed_with_key(key);
         mt
     }
 
@@ -447,15 +441,11 @@ impl Mt19937GenRand32 {
         }
     }
 
-    /// Reseed a Mersenne Twister from a slice of `u32`s.
-    #[inline]
-    pub fn reseed_from_slice(&mut self, key: &[u32]) {
-        self.reseed_from_iter(key.iter().copied())
-    }
-
     /// Reseed a Mersenne Twister from am iterator of `u32`s.
+    ///
+    /// Key can have any length.
     #[allow(clippy::cast_possible_truncation)]
-    pub fn reseed_from_iter<I>(&mut self, key: I)
+    pub fn reseed_with_key<I>(&mut self, key: I)
     where
         I: IntoIterator<Item = u32>,
         I::IntoIter: Clone,
@@ -541,8 +531,9 @@ mod tests {
 
     #[test]
     fn seeded_state_from_u32_slice_key() {
-        let mt =
-            Mt19937GenRand32::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
+        let mt = Mt19937GenRand32::new_with_key(
+            [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32].iter().copied(),
+        );
         for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
             assert_eq!(x, y);
         }
@@ -550,8 +541,9 @@ mod tests {
 
     #[test]
     fn output_from_u32_slice_key() {
-        let mut mt =
-            Mt19937GenRand32::new_from_slice(&[0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32][..]);
+        let mut mt = Mt19937GenRand32::new_with_key(
+            [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32].iter().copied(),
+        );
         for &x in vectors::TEST_OUTPUT.iter() {
             assert_eq!(x, mt.next_u32());
         }
