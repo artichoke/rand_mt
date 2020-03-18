@@ -12,6 +12,7 @@
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::cargo)]
+#![allow(clippy::multiple_crate_versions)] // version-check 0.8.1
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
