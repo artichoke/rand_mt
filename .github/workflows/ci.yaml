@@ -30,8 +30,8 @@ jobs:
       - name: Test
         run: cargo test
 
-      - name: Test with all featurs
-        run: cargo test --all-featurs
+      - name: Test with all features
+        run: cargo test --all-features
 
       - name: Test with no default features
         run: cargo test --no-default-features
