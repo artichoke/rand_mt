@@ -16,7 +16,7 @@
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
 #![forbid(unsafe_code)]
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 //! Mersenne Twister random number generators.
 //!
@@ -67,6 +67,8 @@
 //! assert_eq!(default, mt);
 //! ```
 
+use core::fmt;
+
 pub use crate::mt::Mt19937GenRand32;
 pub use crate::mt64::Mt19937GenRand64;
 
@@ -80,3 +82,44 @@ pub type Mt = Mt19937GenRand32;
 
 /// A type alias for [`Mt19937GenRand64`], 64-bit Mersenne Twister.
 pub type Mt64 = Mt19937GenRand64;
+
+/// Error returned from fallible Mersenne Twister recovery constructors.
+///
+/// When the `std` feature is enabled, this type implements `std::error::Error`.
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub enum RecoverRngError {
+    /// Attempted to recover an RNG with too many samples.
+    ///
+    /// Recover constructors require an exact number of samples to ensure the
+    /// recovered RNG matches the state of the RNG that supplied all of the
+    /// samples.
+    TooFewSamples(usize),
+    /// Attempted to recover an RNG with too few samples.
+    ///
+    /// Too few samples leaves the internal state buffer partially
+    /// uninitialized.
+    ///
+    /// Recover constructors require an exact number of samples to ensure the
+    /// recovered RNG matches the state of the RNG that supplied all of the
+    /// samples.
+    TooManySamples(usize),
+}
+
+impl fmt::Display for RecoverRngError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TooFewSamples(expected) => {
+                write!(f, "Too few samples given to recover: expected {}", expected)
+            }
+            Self::TooManySamples(expected) => write!(
+                f,
+                "Too many samples given to recover: expected {}",
+                expected
+            ),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for RecoverRngError {}

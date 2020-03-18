@@ -23,7 +23,8 @@ This crate depends on [rand_core](https://crates.io/crates/rand_core).
 
 ## Crate Features
 
-`rand_mt` is `no_std` compatible.
+`rand_mt` is `no_std` compatible. `rand_mt` has an optional `std` feature which
+is enabled by default that adds `std::error::Error` impls when enabled.
 
 Mersenne Twister requires ~2.5KB of internal state. To make the RNGs implemented
 in this crate practical to embed in other structs, you may wish to store the RNG

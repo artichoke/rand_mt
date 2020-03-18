@@ -30,6 +30,12 @@ jobs:
       - name: Test
         run: cargo test
 
+      - name: Test with all featurs
+        run: cargo test --all-featurs
+
+      - name: Test with no default features
+        run: cargo test --no-default-features
+
   rust:
     name: Lint and format Rust
     runs-on: ubuntu-latest
