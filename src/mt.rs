@@ -540,6 +540,11 @@ mod tests {
     }
 
     #[test]
+    fn seed_with_empty_iter_returns() {
+        let _ = Mt19937GenRand32::new_with_key(core::iter::empty());
+    }
+
+    #[test]
     fn output_from_u32_slice_key() {
         let mut mt = Mt19937GenRand32::new_with_key(
             [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32].iter().copied(),
