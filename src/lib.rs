@@ -25,35 +25,31 @@
 //!
 //! This crate provides:
 //!
-//! - [`MT19937`], the original reference Mersenne Twister implementation. This
-//!   is a good choice on both 32-bit and 64-bit CPUs (for 32-bit output).
-//! - [`MT19937_64`], the 64-bit variant of `MT19937`. This algorithm produces a
-//!   different output stream than `MT19937`. This is a good choice on 64-bit
+//! - [`Mt19937GenRand32`], the original reference Mersenne Twister
+//!   implementation known as `MT19937`. This is a good choice on both 32-bit
+//!   and 64-bit CPUs (for 32-bit output).
+//! - [`Mt19937GenRand64`], the 64-bit variant of `MT19937` known as
+//!   `MT19937-64`. This algorithm produces a different output stream than
+//!   `MT19937` and produces 64-bit output. This is a good choice on 64-bit
 //!   CPUs.
 //!
-//! Both of these use 2.5KB of state. [`MT19937`] uses a 32-bit seed and can be
-//! seeded from a `&[u32]`. [`MT19937_64`] uses a 64-bit seed and can be seeded
-//! from a `&[u64]`.
+//! Both of these use 2.5KB of state. [`Mt19937GenRand32`] uses a 32-bit seed.
+//! [`Mt19937GenRand64`] uses a 64-bit seed. Both can be seeded from an iterator
+//! of seeds.
 //!
 //! Both RNGs implement a `recover` constructor which can reconstruct the RNG
 //! state from a sequence of output samples.
 //!
-//!
 //! ## Usage
 //!
-//! If your application does not require a specific Mersenne Twister flavor
-//! (32-bit or 64-bit), you can use the default flavor for your target platform
-//! by using the `MersenneTwister` type definition. Either flavor accepts a
-//! `u64` seed.
+//! You can seed a RNG and begin sampling it:
 //!
 //! ```
-//! # use rand_mt::MersenneTwister;
 //! # use rand_core::{RngCore, SeedableRng};
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! // Get a seed somehow, expected to be a little endian encoded `u64`.
-//! let seed: [u8; 8] = 0x1234_567_89ab_cdef_u64.to_le_bytes();
-//! // Create the default RNG.
-//! let mut rng = MersenneTwister::from_seed(seed);
+//! # use rand_mt::Mt64;
+//! # fn main() -> Result<(), rand_core::Error> {
+//! // Create the RNG.
+//! let mut rng = Mt64::new(0x1234_567_89ab_cdef_u64);
 //! // start grabbing randomness from rng...
 //! let mut buf = vec![0; 512];
 //! rng.try_fill_bytes(&mut buf)?;
@@ -65,37 +61,22 @@
 //! reference implementations:
 //!
 //! ```
-//! # use rand_mt::MersenneTwister;
-//! let default = MersenneTwister::default();
-//! let mt = MersenneTwister::new_unseeded();
+//! # use rand_mt::Mt;
+//! let default = Mt::default();
+//! let mt = Mt::new_unseeded();
 //! assert_eq!(default, mt);
 //! ```
-//!
-//! ## Portability
-//!
-//! Note that [`MT19937`] and [`MT19937_64`] are **not** identical algorithms,
-//! despite their similar names. They produce different output streams from the
-//! same seed. You will need to pick a specific flavor of the two algorithms if
-//! portable reproducibility is important to you.
 
-pub use crate::mt19937::MT19937;
-pub use crate::mt19937_64::MT19937_64;
+pub use crate::mt::Mt19937GenRand32;
+pub use crate::mt64::Mt19937GenRand64;
 
-mod mt19937;
-mod mt19937_64;
+mod mt;
+mod mt64;
 #[cfg(test)]
 mod vectors;
 
-/// The most platform-appropriate Mersenne Twister flavor.
-///
-/// On 32-bit platforms, this is a type alias to [`MT19937`]. On 64-bit
-/// platforms this is a type alias to [`MT19937_64`].
-#[cfg(target_pointer_width = "32")]
-pub type MersenneTwister = MT19937;
+/// A type alias for [`Mt19937GenRand32`], 32-bit Mersenne Twister.
+pub type Mt = Mt19937GenRand32;
 
-/// The most platform-appropriate Mersenne Twister flavor.
-///
-/// On 32-bit platforms, this is a type alias to [`MT19937`]. On 64-bit
-/// platforms this is a type alias to [`MT19937_64`].
-#[cfg(target_pointer_width = "64")]
-pub type MersenneTwister = MT19937_64;
+/// A type alias for [`Mt19937GenRand64`], 64-bit Mersenne Twister.
+pub type Mt64 = Mt19937GenRand64;
