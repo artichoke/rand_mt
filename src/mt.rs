@@ -395,7 +395,6 @@ impl Mt19937GenRand32 {
     /// If `key` has more than 624 elements, an error is returned because the
     /// recovered RNG will not produce identical output to the RNG that supplied
     /// the samples.
-    #[must_use]
     pub fn recover<I>(key: I) -> Result<Self, RecoverRngError>
     where
         I: IntoIterator<Item = u32>,
