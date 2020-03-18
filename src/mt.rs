@@ -45,6 +45,7 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 /// assert_eq!(mem::size_of::<Mt19937GenRand64>(), mem::size_of::<Mt19937GenRand32>());
 /// ```
 #[derive(Clone)]
+#[allow(clippy::module_name_repetitions)]
 pub struct Mt19937GenRand32 {
     idx: usize,
     state: [Wrapping<u32>; N],
