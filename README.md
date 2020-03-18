@@ -21,6 +21,26 @@ A variant of Mersenne Twister is the
 
 This crate depends on [rand_core](https://crates.io/crates/rand_core).
 
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+rand_core = "0.5"
+rand_mt = "2"
+```
+
+Then create a RNG like:
+
+```rust
+use rand_core::RngCore;
+use rand_mt::Mt64;
+
+let mut rng = Mt64::new_unseeded();
+assert_ne!(rng.next_u64(), rng.next_u64());
+```
+
 ## Crate Features
 
 `rand_mt` is `no_std` compatible. `rand_mt` has an optional `std` feature which

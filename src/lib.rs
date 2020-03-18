@@ -67,6 +67,11 @@
 //! assert_eq!(default, mt);
 //! ```
 
+#![doc(html_root_url = "https://docs.rs/rand_mt/2.0.0")]
+
+#[cfg(doctest)]
+doc_comment::doctest!("../README.md");
+
 use core::fmt;
 
 pub use crate::mt::Mt19937GenRand32;
