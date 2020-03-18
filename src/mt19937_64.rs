@@ -48,9 +48,26 @@ pub struct MT19937_64 {
     state: [Wrapping<u64>; NN],
 }
 
-impl fmt::Debug for MT19937_64 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "MT19937_64 {{}}")
+impl cmp::Eq for MT19937_64 {}
+
+impl cmp::PartialEq for MT19937_64 {
+    fn eq(&self, other: &Self) -> bool {
+        self.state[..] == other.state[..] && self.idx == other.idx
+    }
+}
+
+impl cmp::Ord for MT19937_64 {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        match self.state[..].cmp(&other.state[..]) {
+            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
+            ordering => ordering,
+        }
+    }
+}
+
+impl cmp::PartialOrd for MT19937_64 {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -61,26 +78,19 @@ impl hash::Hash for MT19937_64 {
     }
 }
 
-impl cmp::PartialEq for MT19937_64 {
-    fn eq(&self, other: &Self) -> bool {
-        self.state[..] == other.state[..] && self.idx == other.idx
+impl fmt::Debug for MT19937_64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "MT19937_64 {{}}")
     }
 }
 
-impl cmp::Eq for MT19937_64 {}
-
-impl cmp::PartialOrd for MT19937_64 {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl cmp::Ord for MT19937_64 {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
-        match self.state[..].cmp(&other.state[..]) {
-            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
-            ordering => ordering,
-        }
+impl Default for MT19937_64 {
+    /// Return a new `MT19937_64` with the default seed.
+    ///
+    /// Equivalent to calling [`MT19937_64::new_unseeded`].
+    #[inline]
+    fn default() -> Self {
+        Self::new_unseeded()
     }
 }
 
@@ -453,16 +463,6 @@ fn untemper(mut x: u64) -> u64 {
     x ^= (x >> 29) & 0x0000_0000_0000_0015;
 
     x
-}
-
-impl Default for MT19937_64 {
-    /// Return a new `MT19937_64` with the default seed.
-    ///
-    /// Equivalent to calling [`MT19937_64::new_unseeded`].
-    #[inline]
-    fn default() -> MT19937_64 {
-        MT19937_64::new_unseeded()
-    }
 }
 
 #[cfg(test)]
