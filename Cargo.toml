@@ -1,6 +1,6 @@
 [package]
 name = "rand_mt"
-version = "2.0.0"
+version = "2.0.0" # remember to set `html_root_url` in `src/lib.rs`.
 authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
@@ -28,5 +28,7 @@ std = []
 rand_core = "0.5"
 
 [dev-dependencies]
+doc-comment = "0.3"
 quickcheck = { version = "0.9", default-features = false }
 quickcheck_macros = "0.9"
+version-sync = "0.8"
