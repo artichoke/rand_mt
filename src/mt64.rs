@@ -232,7 +232,7 @@ impl RngCore for Mt19937GenRand64 {
 }
 
 impl From<[u64; NN]> for Mt19937GenRand64 {
-    /// Recover the internal state of a Mersenne Twister using the past 624
+    /// Recover the internal state of a Mersenne Twister using the past 312
     /// samples.
     ///
     /// This conversion takes a history of samples from a RNG and returns a
@@ -254,7 +254,7 @@ impl TryFrom<&[u64]> for Mt19937GenRand64 {
     type Error = RecoverRngError;
 
     /// Attempt to recover the internal state of a Mersenne Twister using the
-    /// past 624 samples.
+    /// past 312 samples.
     ///
     /// This conversion takes a history of samples from a RNG and returns a
     /// RNG that will produce identical output to the RNG that supplied the
@@ -264,10 +264,10 @@ impl TryFrom<&[u64]> for Mt19937GenRand64 {
     ///
     /// # Errors
     ///
-    /// If `key` has less than 624 elements, an error is returned because there
+    /// If `key` has less than 312 elements, an error is returned because there
     /// is not enough data to fully initialize the RNG.
     ///
-    /// If `key` has more than 624 elements, an error is returned because the
+    /// If `key` has more than 312 elements, an error is returned because the
     /// recovered RNG will not produce identical output to the RNG that supplied
     /// the samples.
     #[inline]
