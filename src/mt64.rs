@@ -536,6 +536,11 @@ mod tests {
     }
 
     #[test]
+    fn seed_with_empty_iter_returns() {
+        let _ = Mt19937GenRand64::new_with_key(core::iter::empty());
+    }
+
+    #[test]
     fn output_from_u64_slice_key() {
         let mut mt = Mt19937GenRand64::new_with_key(
             [0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64]
