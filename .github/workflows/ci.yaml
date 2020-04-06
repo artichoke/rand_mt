@@ -82,13 +82,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Node toolchain
-        uses: actions/setup-node@v1
-        with:
-          node-version: "12.x"
-
-      - name: Install prettier
-        run: npm install -g prettier
+      - name: Format with prettier
+        run: npx prettier --check '**/*'
 
       - name: Format markdown with prettier
-        run: prettier --prose-wrap always --check '**/*.md' '*.md'
+        run: npx prettier --prose-wrap always --check '**/*.md' '*.md'
