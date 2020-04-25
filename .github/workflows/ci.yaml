@@ -47,8 +47,6 @@ jobs:
   rust:
     name: Lint and format Rust
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -76,8 +74,6 @@ jobs:
   text:
     name: Lint and format text
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -86,4 +82,7 @@ jobs:
         run: npx prettier --check '**/*'
 
       - name: Format markdown with prettier
-        run: npx prettier --prose-wrap always --check '**/*.md' '*.md'
+        run: npx prettier --prose-wrap always --check '**/*.md'
+
+      - name: Format YAML with prettier
+        run: npx prettier --prose-wrap always --check '**/*.{yaml,yml}'
