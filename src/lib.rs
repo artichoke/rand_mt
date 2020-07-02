@@ -12,7 +12,6 @@
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
 #![deny(clippy::cargo)]
-#![allow(clippy::multiple_crate_versions)] // version-check 0.8.1
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
@@ -70,8 +69,19 @@
 
 #![doc(html_root_url = "https://docs.rs/rand_mt/3.0.0")]
 
+// Ensure code blocks in README.md compile
 #[cfg(doctest)]
-doc_comment::doctest!("../README.md");
+macro_rules! readme {
+    ($x:expr) => {
+        #[doc = $x]
+        mod readme {}
+    };
+    () => {
+        readme!(include_str!("../README.md"));
+    };
+}
+#[cfg(doctest)]
+readme!();
 
 use core::fmt;
 
