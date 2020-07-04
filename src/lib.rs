@@ -15,6 +15,9 @@
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
+#![warn(trivial_casts, trivial_numeric_casts)]
+#![warn(unused_qualifications)]
+#![warn(variant_size_differences)]
 #![forbid(unsafe_code)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
