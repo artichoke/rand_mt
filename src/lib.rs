@@ -15,6 +15,9 @@
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![warn(rust_2018_idioms)]
+#![warn(trivial_casts, trivial_numeric_casts)]
+#![warn(unused_qualifications)]
+#![warn(variant_size_differences)]
 #![forbid(unsafe_code)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -47,7 +50,7 @@
 //! ```
 //! # use rand_core::{RngCore, SeedableRng};
 //! # use rand_mt::Mt64;
-//! # fn main() -> Result<(), rand_core::Error> {
+//! # fn example() -> Result<(), rand_core::Error> {
 //! // Create the RNG.
 //! let mut rng = Mt64::new(0x1234_567_89ab_cdef_u64);
 //! // start grabbing randomness from rng...
@@ -55,6 +58,7 @@
 //! rng.try_fill_bytes(&mut buf)?;
 //! # Ok(())
 //! # }
+//! # example().unwrap()
 //! ```
 //!
 //! Or if you want to use the default (fixed) seeds that are specified in the

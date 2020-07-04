@@ -9,7 +9,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use core::cmp;
+use core::cmp::Ordering;
 use core::convert::TryFrom;
 use core::fmt;
 use core::hash;
@@ -51,25 +51,25 @@ pub struct Mt19937GenRand64 {
     state: [Wrapping<u64>; NN],
 }
 
-impl cmp::Eq for Mt19937GenRand64 {}
+impl Eq for Mt19937GenRand64 {}
 
-impl cmp::PartialEq for Mt19937GenRand64 {
+impl PartialEq for Mt19937GenRand64 {
     fn eq(&self, other: &Self) -> bool {
         self.state[..] == other.state[..] && self.idx == other.idx
     }
 }
 
-impl cmp::Ord for Mt19937GenRand64 {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
+impl Ord for Mt19937GenRand64 {
+    fn cmp(&self, other: &Self) -> Ordering {
         match self.state[..].cmp(&other.state[..]) {
-            cmp::Ordering::Equal => self.idx.cmp(&other.idx),
+            Ordering::Equal => self.idx.cmp(&other.idx),
             ordering => ordering,
         }
     }
 }
 
-impl cmp::PartialOrd for Mt19937GenRand64 {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+impl PartialOrd for Mt19937GenRand64 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
@@ -216,7 +216,7 @@ impl RngCore for Mt19937GenRand64 {
     /// ```
     /// # use rand_core::RngCore;
     /// # use rand_mt::Mt19937GenRand64;
-    /// # fn main() -> Result<(), rand_core::Error> {
+    /// # fn example() -> Result<(), rand_core::Error> {
     /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.try_fill_bytes(&mut buf)?;
@@ -226,6 +226,7 @@ impl RngCore for Mt19937GenRand64 {
     /// assert_ne!([0; 31], buf);
     /// # Ok(())
     /// # }
+    /// # example().unwrap()
     /// ```
     #[inline]
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
