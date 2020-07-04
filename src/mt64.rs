@@ -216,7 +216,7 @@ impl RngCore for Mt19937GenRand64 {
     /// ```
     /// # use rand_core::RngCore;
     /// # use rand_mt::Mt19937GenRand64;
-    /// # fn main() -> Result<(), rand_core::Error> {
+    /// # fn example() -> Result<(), rand_core::Error> {
     /// let mut mt = Mt19937GenRand64::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.try_fill_bytes(&mut buf)?;
@@ -226,6 +226,7 @@ impl RngCore for Mt19937GenRand64 {
     /// assert_ne!([0; 31], buf);
     /// # Ok(())
     /// # }
+    /// # example().unwrap()
     /// ```
     #[inline]
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {

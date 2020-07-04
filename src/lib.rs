@@ -47,7 +47,7 @@
 //! ```
 //! # use rand_core::{RngCore, SeedableRng};
 //! # use rand_mt::Mt64;
-//! # fn main() -> Result<(), rand_core::Error> {
+//! # fn example() -> Result<(), rand_core::Error> {
 //! // Create the RNG.
 //! let mut rng = Mt64::new(0x1234_567_89ab_cdef_u64);
 //! // start grabbing randomness from rng...
@@ -55,6 +55,7 @@
 //! rng.try_fill_bytes(&mut buf)?;
 //! # Ok(())
 //! # }
+//! # example().unwrap()
 //! ```
 //!
 //! Or if you want to use the default (fixed) seeds that are specified in the
