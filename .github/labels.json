@@ -7,7 +7,7 @@
   {
     "name": "A-core",
     "color": "f7e101",
-    "description": "Area: Core MT implementation."
+    "description": "Area: Core Mersenne Twister implementation."
   },
   {
     "name": "A-crate-features",
@@ -33,6 +33,11 @@
     "name": "A-release",
     "color": "f7e101",
     "description": "Area: crates.io releases and version bumps."
+  },
+  {
+    "name": "A-security",
+    "color": "f7e101",
+    "description": "Area: security vulnerabilities and unsoundness issues."
   },
   {
     "name": "C-bug",
