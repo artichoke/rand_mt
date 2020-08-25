@@ -28,6 +28,7 @@ std = []
 rand_core = "0.5"
 
 [dev-dependencies]
+rand = "0.7"
 quickcheck = { version = "0.9", default-features = false }
 quickcheck_macros = "0.9"
 version-sync = "0.9"
