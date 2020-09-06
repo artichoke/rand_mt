@@ -35,6 +35,11 @@
     "description": "Area: crates.io releases and version bumps."
   },
   {
+    "name": "A-ruby",
+    "color": "f7e101",
+    "description": "Area: Compatibility with Ruby's Mersenne Twister implementation in `Random`."
+  },
+  {
     "name": "A-security",
     "color": "f7e101",
     "description": "Area: security vulnerabilities and unsoundness issues."
