@@ -14,12 +14,10 @@ Implemenents a selection of Mersenne Twister random number generators.
 > Matsumoto, 1997).
 
 The Mersenne Twister algorithms are not suitable for cryptographic uses, but are
-ubiquitous. See the
-[Mersenne Twister website](http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html).
-A variant of Mersenne Twister is the
-[default PRNG in Ruby](https://ruby-doc.org/core-2.6.3/Random.html).
+ubiquitous. See the [Mersenne Twister website]. A variant of Mersenne Twister is
+the [default PRNG in Ruby].
 
-This crate depends on [rand_core](https://crates.io/crates/rand_core).
+This crate depends on [rand_core].
 
 ## Usage
 
@@ -53,9 +51,14 @@ in a `Box`.
 ## License
 
 `rand_mt` is distributed under the terms of either the
-[MIT License](/LICENSE-MIT) or the
-[Apache License (Version 2.0)](/LICENSE-APACHE).
+[MIT License](LICENSE-MIT) or the
+[Apache License (Version 2.0)](LICENSE-APACHE).
 
-`rand_mt` is derived from `rust-mersenne-twister` @
-[`1.1.1`](https://github.com/dcrewi/rust-mersenne-twister/tree/1.1.1) which is
-Copyright (c) 2015 rust-mersenne-twister developers.
+`rand_mt` is derived from `rust-mersenne-twister` @ [`1.1.1`] which is Copyright
+(c) 2015 rust-mersenne-twister developers.
+
+[mersenne twister website]:
+  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+[default prng in ruby]: https://ruby-doc.org/core-2.6.3/Random.html
+[rand_core]: https://crates.io/crates/rand_core
+[`1.1.1`]: https://github.com/dcrewi/rust-mersenne-twister/tree/1.1.1
