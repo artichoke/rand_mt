@@ -48,6 +48,11 @@ Mersenne Twister requires ~2.5KB of internal state. To make the RNGs implemented
 in this crate practical to embed in other structs, you may wish to store the RNG
 in a `Box`.
 
+### Minimum Supported Rust Version
+
+This crate requires at least Rust 1.47.0. This version can be bumped in minor
+releases.
+
 ## License
 
 `rand_mt` is distributed under the terms of either the
