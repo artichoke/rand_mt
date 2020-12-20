@@ -20,7 +20,6 @@
 #![warn(unused_qualifications)]
 #![warn(variant_size_differences)]
 #![forbid(unsafe_code)]
-#![cfg_attr(not(feature = "std"), no_std)]
 
 //! Mersenne Twister random number generators.
 //!
@@ -44,22 +43,17 @@
 //! Both RNGs implement a `recover` constructor which can reconstruct the RNG
 //! state from a sequence of output samples.
 //!
-//! ## Usage
+//! # Usage
 //!
 //! You can seed a RNG and begin sampling it:
 //!
 //! ```
-//! # use rand_core::{RngCore, SeedableRng};
 //! # use rand_mt::Mt64;
-//! # fn example() -> Result<(), rand_core::Error> {
 //! // Create the RNG.
 //! let mut rng = Mt64::new(0x1234_567_89ab_cdef_u64);
 //! // start grabbing randomness from rng...
 //! let mut buf = vec![0; 512];
-//! rng.try_fill_bytes(&mut buf)?;
-//! # Ok(())
-//! # }
-//! # example().unwrap()
+//! rng.fill_bytes(&mut buf);
 //! ```
 //!
 //! Or if you want to use the default (fixed) seeds that are specified in the
@@ -71,8 +65,27 @@
 //! let mt = Mt::new_unseeded();
 //! assert_eq!(default, mt);
 //! ```
+//!
+//! # Crate Features
+//!
+//! `rand_mt` is `no_std` compatible. `rand_mt` has several optional features
+//! that are enabled by default:
+//!
+//! - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
+//!   feature implements `RngCore` and `SeedableRng` on the RNGs in this crate.
+//! - **std** - Enables a dependency on the Rust Standard Library. Activating
+//!   this feature enables [`std::error::Error`] impls on error types in this
+//!   crate.
+//!
+//! Mersenne Twister requires ~2.5KB of internal state. To make the RNGs
+//! implemented in this crate practical to embed in other structs, you may wish
+//! to store the RNG in a `Box`.
+//!
+//! [`rand_core`]: https://crates.io/crates/rand_core
+//! [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
 
 #![doc(html_root_url = "https://docs.rs/rand_mt/3.0.0")]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 // Ensure code blocks in README.md compile
 #[cfg(doctest)]

@@ -2,7 +2,6 @@
 extern crate test;
 
 mod mt19937 {
-    use rand_core::RngCore;
     use rand_mt::Mt;
 
     #[bench]
@@ -23,7 +22,6 @@ mod mt19937 {
 }
 
 mod mt19937_64 {
-    use rand_core::RngCore;
     use rand_mt::Mt64;
 
     #[bench]
