@@ -13,9 +13,10 @@ use core::convert::TryFrom;
 use core::fmt;
 use core::num::Wrapping;
 
-use rand_core::{RngCore, SeedableRng};
-
 use crate::RecoverRngError;
+
+#[cfg(feature = "rand-traits")]
+mod rand;
 
 const N: usize = 624;
 const M: usize = 397;
@@ -53,6 +54,7 @@ pub struct Mt19937GenRand32 {
 }
 
 impl fmt::Debug for Mt19937GenRand32 {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Mt19937GenRand64 {}")
     }
@@ -68,142 +70,46 @@ impl Default for Mt19937GenRand32 {
     }
 }
 
-impl SeedableRng for Mt19937GenRand32 {
-    type Seed = [u8; 4];
-
-    /// Reseed from a little endian encoded `u32`.
+impl From<[u8; 4]> for Mt19937GenRand32 {
+    /// Construct a Mersenne Twister RNG from 4 bytes.
+    ///
+    /// The given bytes are treated as a little endian encoded `u32`.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use rand_core::{RngCore, SeedableRng};
     /// # use rand_mt::Mt19937GenRand32;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
-    /// let mut mt = Mt19937GenRand32::from_seed(seed);
+    /// let mut mt = Mt19937GenRand32::from(seed);
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
+    ///
+    /// This constructor is equivalent to passing a little endian encoded `u32`.
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand32;
+    /// // Default MT seed
+    /// let seed = 5489_u32.to_le_bytes();
+    /// let mt1 = Mt19937GenRand32::from(seed);
+    /// let mt2 = Mt19937GenRand32::new(5489_u32);
+    /// assert_eq!(mt1, mt2);
+    /// ```
     #[inline]
-    fn from_seed(seed: Self::Seed) -> Self {
+    fn from(seed: [u8; 4]) -> Self {
         Self::new(u32::from_le_bytes(seed))
     }
 }
 
-impl RngCore for Mt19937GenRand32 {
-    /// Generate next `u64` output.
+impl From<u32> for Mt19937GenRand32 {
+    /// Construct a Mersenne Twister RNG from a `u32` seed.
     ///
-    /// This function is implemented by generating two `u32`s from the RNG and
-    /// shifting + masking them into a `u64` output.
+    /// This function is equivalent to [`new`].
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rand_core::RngCore;
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
-    /// assert_ne!(mt.next_u64(), mt.next_u64());
-    /// ```
+    /// [`new`]: Self::new
     #[inline]
-    fn next_u64(&mut self) -> u64 {
-        let out = u64::from(self.next_u32());
-        let out = out << 32;
-        out | u64::from(self.next_u32())
-    }
-
-    /// Generate next `u32` output.
-    ///
-    /// `u32` is the native output of the generator. This function advances the
-    /// RNG step counter by one.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rand_core::RngCore;
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
-    /// assert_ne!(mt.next_u32(), mt.next_u32());
-    /// ```
-    #[inline]
-    fn next_u32(&mut self) -> u32 {
-        // Failing this check indicates that, somehow, the structure
-        // was not initialized.
-        debug_assert!(self.idx != 0);
-        if self.idx >= N {
-            self.fill_next_state();
-        }
-        let Wrapping(x) = self.state[self.idx];
-        self.idx += 1;
-        temper(x)
-    }
-
-    /// Fill a buffer with bytes generated from the RNG.
-    ///
-    /// This method generates random `u32`s (the native output unit of the RNG)
-    /// until `dest` is filled.
-    ///
-    /// This method may discard some output bits if `dest.len()` is not a
-    /// multiple of 4.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rand_core::RngCore;
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
-    /// let mut buf = [0; 32];
-    /// mt.fill_bytes(&mut buf);
-    /// assert_ne!([0; 32], buf);
-    /// let mut buf = [0; 31];
-    /// mt.fill_bytes(&mut buf);
-    /// assert_ne!([0; 31], buf);
-    /// ```
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
-        let mut left = dest;
-        while left.len() >= 4 {
-            let (l, r) = left.split_at_mut(4);
-            left = r;
-            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
-            l.copy_from_slice(&chunk);
-        }
-        let n = left.len();
-        if n > 0 {
-            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
-            left.copy_from_slice(&chunk[..n]);
-        }
-    }
-
-    /// Fill a buffer with bytes generated from the RNG.
-    ///
-    /// This method generates random `u32`s (the native output unit of the RNG)
-    /// until `dest` is filled.
-    ///
-    /// This method may discard some output bits if `dest.len()` is not a
-    /// multiple of 4.
-    ///
-    /// `try_fill_bytes` is implemented with [`fill_bytes`](RngCore::fill_bytes)
-    /// and is infallible.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rand_core::RngCore;
-    /// # use rand_mt::Mt19937GenRand32;
-    /// # fn example() -> Result<(), rand_core::Error> {
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
-    /// let mut buf = [0; 32];
-    /// mt.try_fill_bytes(&mut buf)?;
-    /// assert_ne!([0; 32], buf);
-    /// let mut buf = [0; 31];
-    /// mt.try_fill_bytes(&mut buf)?;
-    /// assert_ne!([0; 31], buf);
-    /// # Ok(())
-    /// # }
-    /// # example().unwrap()
-    /// ```
-    #[inline]
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-        self.fill_bytes(dest);
-        Ok(())
+    fn from(seed: u32) -> Self {
+        Self::new(seed)
     }
 }
 
@@ -214,6 +120,7 @@ impl From<[u32; N]> for Mt19937GenRand32 {
     /// This conversion takes a history of samples from a RNG and returns a
     /// RNG that will produce identical output to the RNG that supplied the
     /// samples.
+    #[inline]
     fn from(key: [u32; N]) -> Self {
         let mut mt = Self {
             idx: N,
@@ -264,11 +171,10 @@ impl Mt19937GenRand32 {
     /// ## Constructing with a `u32` seed
     ///
     /// ```
-    /// # use rand_core::SeedableRng;
     /// # use rand_mt::Mt19937GenRand32;
     /// let seed = 123_456_789_u32;
     /// let mt1 = Mt19937GenRand32::new(seed);
-    /// let mt2 = Mt19937GenRand32::from_seed(seed.to_le_bytes());
+    /// let mt2 = Mt19937GenRand32::from(seed.to_le_bytes());
     /// assert_eq!(mt1, mt2);
     /// ```
     ///
@@ -295,6 +201,7 @@ impl Mt19937GenRand32 {
     /// key.
     ///
     /// Key can have any length.
+    #[inline]
     #[must_use]
     pub fn new_with_key<I>(key: I) -> Self
     where
@@ -315,7 +222,6 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_core::SeedableRng;
     /// # use rand_mt::Mt19937GenRand32;
     /// // Default MT seed
     /// let seed = 5489_u32;
@@ -329,18 +235,84 @@ impl Mt19937GenRand32 {
         Self::new(Self::DEFAULT_SEED)
     }
 
-    fn fill_next_state(&mut self) {
-        for i in 0..N - M {
-            let x = (self.state[i] & UPPER_MASK) | (self.state[i + 1] & LOWER_MASK);
-            self.state[i] = self.state[i + M] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
+    /// Generate next `u64` output.
+    ///
+    /// This function is implemented by generating two `u32`s from the RNG and
+    /// shifting + masking them into a `u64` output.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand32;
+    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// assert_ne!(mt.next_u64(), mt.next_u64());
+    /// ```
+    #[inline]
+    pub fn next_u64(&mut self) -> u64 {
+        let out = u64::from(self.next_u32());
+        let out = out << 32;
+        out | u64::from(self.next_u32())
+    }
+
+    /// Generate next `u32` output.
+    ///
+    /// `u32` is the native output of the generator. This function advances the
+    /// RNG step counter by one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand32;
+    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// assert_ne!(mt.next_u32(), mt.next_u32());
+    /// ```
+    #[inline]
+    pub fn next_u32(&mut self) -> u32 {
+        // Failing this check indicates that, somehow, the structure
+        // was not initialized.
+        debug_assert!(self.idx != 0);
+        if self.idx >= N {
+            fill_next_state(self);
         }
-        for i in N - M..N - 1 {
-            let x = (self.state[i] & UPPER_MASK) | (self.state[i + 1] & LOWER_MASK);
-            self.state[i] = self.state[i + M - N] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
+        let Wrapping(x) = self.state[self.idx];
+        self.idx += 1;
+        temper(x)
+    }
+
+    /// Fill a buffer with bytes generated from the RNG.
+    ///
+    /// This method generates random `u32`s (the native output unit of the RNG)
+    /// until `dest` is filled.
+    ///
+    /// This method may discard some output bits if `dest.len()` is not a
+    /// multiple of 4.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand32;
+    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// let mut buf = [0; 32];
+    /// mt.fill_bytes(&mut buf);
+    /// assert_ne!([0; 32], buf);
+    /// let mut buf = [0; 31];
+    /// mt.fill_bytes(&mut buf);
+    /// assert_ne!([0; 31], buf);
+    /// ```
+    #[inline]
+    pub fn fill_bytes(&mut self, dest: &mut [u8]) {
+        let mut left = dest;
+        while left.len() >= 4 {
+            let (l, r) = left.split_at_mut(4);
+            left = r;
+            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
+            l.copy_from_slice(&chunk);
         }
-        let x = (self.state[N - 1] & UPPER_MASK) | (self.state[0] & LOWER_MASK);
-        self.state[N - 1] = self.state[M - 1] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
-        self.idx = 0;
+        let n = left.len();
+        if n > 0 {
+            let chunk: [u8; 4] = self.next_u32().to_le_bytes();
+            left.copy_from_slice(&chunk[..n]);
+        }
     }
 
     /// Attempt to recover the internal state of a Mersenne Twister using the
@@ -361,6 +333,7 @@ impl Mt19937GenRand32 {
     /// If `key` has more than 624 elements, an error is returned because the
     /// recovered RNG will not produce identical output to the RNG that supplied
     /// the samples.
+    #[inline]
     pub fn recover<I>(key: I) -> Result<Self, RecoverRngError>
     where
         I: IntoIterator<Item = u32>,
@@ -389,7 +362,6 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_core::{RngCore, SeedableRng};
     /// # use rand_mt::Mt19937GenRand32;
     /// // Default MT seed
     /// let mut mt = Mt19937GenRand32::new_unseeded();
@@ -399,6 +371,7 @@ impl Mt19937GenRand32 {
     /// mt.reseed(5489_u32);
     /// assert_eq!(first, mt.next_u32());
     /// ```
+    #[inline]
     #[allow(clippy::cast_possible_truncation)]
     pub fn reseed(&mut self, seed: u32) {
         self.idx = N;
@@ -413,6 +386,7 @@ impl Mt19937GenRand32 {
     /// Reseed a Mersenne Twister from am iterator of `u32`s.
     ///
     /// Key can have any length.
+    #[inline]
     #[allow(clippy::cast_possible_truncation)]
     pub fn reseed_with_key<I>(&mut self, key: I)
     where
@@ -477,48 +451,64 @@ fn untemper(mut x: u32) -> u32 {
     x
 }
 
+#[inline]
+fn fill_next_state(rng: &mut Mt19937GenRand32) {
+    for i in 0..N - M {
+        let x = (rng.state[i] & UPPER_MASK) | (rng.state[i + 1] & LOWER_MASK);
+        rng.state[i] = rng.state[i + M] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
+    }
+    for i in N - M..N - 1 {
+        let x = (rng.state[i] & UPPER_MASK) | (rng.state[i + 1] & LOWER_MASK);
+        rng.state[i] = rng.state[i + M - N] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
+    }
+    let x = (rng.state[N - 1] & UPPER_MASK) | (rng.state[0] & LOWER_MASK);
+    rng.state[N - 1] = rng.state[M - 1] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
+    rng.idx = 0;
+}
+
 #[cfg(test)]
 mod tests {
     use core::convert::TryFrom;
+    use core::iter;
     use core::num::Wrapping;
     use quickcheck_macros::quickcheck;
-    use rand_core::{RngCore, SeedableRng};
 
-    use super::Mt19937GenRand32;
-    use crate::vectors::mt as vectors;
+    use super::{Mt19937GenRand32, N};
+    use crate::vectors::mt::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U32, TEST_OUTPUT};
     use crate::RecoverRngError;
 
     #[test]
     fn seeded_state_from_u32_seed() {
         let mt = Mt19937GenRand32::new(0x1234_5678_u32);
-        let mt_from_seed = Mt19937GenRand32::from_seed(0x1234_5678_u32.to_le_bytes());
-        assert!(mt.state[..] == mt_from_seed.state[..]);
-        for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_U32.iter()) {
+        let mt_from_seed = Mt19937GenRand32::from(0x1234_5678_u32.to_le_bytes());
+        assert_eq!(mt.state, mt_from_seed.state);
+        for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_U32.iter()) {
+            assert_eq!(x, y);
+        }
+        for (&Wrapping(x), &y) in mt_from_seed.state.iter().zip(STATE_SEEDED_BY_U32.iter()) {
             assert_eq!(x, y);
         }
     }
 
     #[test]
     fn seeded_state_from_u32_slice_key() {
-        let mt = Mt19937GenRand32::new_with_key(
-            [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32].iter().copied(),
-        );
-        for (&Wrapping(x), &y) in mt.state.iter().zip(vectors::STATE_SEEDED_BY_SLICE.iter()) {
+        let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
+        let mt = Mt19937GenRand32::new_with_key(key.iter().copied());
+        for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_SLICE.iter()) {
             assert_eq!(x, y);
         }
     }
 
     #[test]
     fn seed_with_empty_iter_returns() {
-        let _ = Mt19937GenRand32::new_with_key(core::iter::empty());
+        let _ = Mt19937GenRand32::new_with_key(iter::empty());
     }
 
     #[test]
     fn output_from_u32_slice_key() {
-        let mut mt = Mt19937GenRand32::new_with_key(
-            [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32].iter().copied(),
-        );
-        for &x in vectors::TEST_OUTPUT.iter() {
+        let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
+        let mut mt = Mt19937GenRand32::new_with_key(key.iter().copied());
+        for &x in TEST_OUTPUT.iter() {
             assert_eq!(x, mt.next_u32());
         }
     }
@@ -556,20 +546,20 @@ mod tests {
     #[test]
     fn recover_required_exact_sample_length() {
         assert_eq!(
-            Err(RecoverRngError::TooFewSamples(super::N)),
-            Mt19937GenRand32::try_from(&[0; 0][..])
+            Mt19937GenRand32::try_from(&[0; 0][..]),
+            Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Err(RecoverRngError::TooFewSamples(super::N)),
-            Mt19937GenRand32::try_from(&[0; 1][..])
+            Mt19937GenRand32::try_from(&[0; 1][..]),
+            Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Err(RecoverRngError::TooManySamples(super::N)),
-            Mt19937GenRand32::try_from(&[0; 625][..])
+            Mt19937GenRand32::try_from(&[0; 625][..]),
+            Err(RecoverRngError::TooManySamples(N))
         );
         assert_eq!(
-            Err(RecoverRngError::TooManySamples(super::N)),
-            Mt19937GenRand32::try_from(&[0; 1000][..])
+            Mt19937GenRand32::try_from(&[0; 1000][..]),
+            Err(RecoverRngError::TooManySamples(N))
         );
     }
 }
