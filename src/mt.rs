@@ -471,7 +471,6 @@ mod tests {
     use core::convert::TryFrom;
     use core::iter;
     use core::num::Wrapping;
-    use quickcheck_macros::quickcheck;
 
     use super::{Mt19937GenRand32, N};
     use crate::vectors::mt::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U32, TEST_OUTPUT};
@@ -513,34 +512,52 @@ mod tests {
         }
     }
 
-    #[quickcheck]
-    fn temper_untemper_is_identity(x: u32) -> bool {
-        x == super::untemper(super::temper(x))
+    #[test]
+    fn temper_untemper_is_identity() {
+        let mut buf = [0; 4];
+        for _ in 0..10_000 {
+            getrandom::getrandom(&mut buf).unwrap();
+            let x = u32::from_le_bytes(buf);
+            assert_eq!(x, super::untemper(super::temper(x)));
+            let x = u32::from_be_bytes(buf);
+            assert_eq!(x, super::untemper(super::temper(x)));
+        }
     }
 
-    #[quickcheck]
-    fn untemper_temper_is_identity(x: u32) -> bool {
-        x == super::temper(super::untemper(x))
+    #[test]
+    fn untemper_temper_is_identity() {
+        let mut buf = [0; 4];
+        for _ in 0..10_000 {
+            getrandom::getrandom(&mut buf).unwrap();
+            let x = u32::from_le_bytes(buf);
+            assert_eq!(x, super::temper(super::untemper(x)));
+            let x = u32::from_be_bytes(buf);
+            assert_eq!(x, super::temper(super::untemper(x)));
+        }
     }
 
-    #[quickcheck]
-    fn recovery(seed: u32, skip: u8) -> bool {
-        let mut orig_mt = Mt19937GenRand32::new(seed);
-        // skip some samples so the RNG is in an intermediate state
-        for _ in 0..skip {
-            orig_mt.next_u32();
-        }
-        let mut samples = [0; 624];
-        for sample in samples.iter_mut() {
-            *sample = orig_mt.next_u32();
-        }
-        let mut recovered_mt = Mt19937GenRand32::from(samples);
-        for _ in 0..624 * 2 {
-            if orig_mt.next_u32() != recovered_mt.next_u32() {
-                return false;
+    #[test]
+    fn recovery() {
+        let mut buf = [0; 4];
+        for _ in 0..100 {
+            getrandom::getrandom(&mut buf).unwrap();
+            let seed = u32::from_le_bytes(buf);
+            for skip in 0..256 {
+                let mut orig_mt = Mt19937GenRand32::new(seed);
+                // skip some samples so the RNG is in an intermediate state
+                for _ in 0..skip {
+                    orig_mt.next_u32();
+                }
+                let mut samples = [0; 624];
+                for sample in samples.iter_mut() {
+                    *sample = orig_mt.next_u32();
+                }
+                let mut recovered_mt = Mt19937GenRand32::from(samples);
+                for _ in 0..624 * 2 {
+                    assert_eq!(orig_mt.next_u32(), recovered_mt.next_u32());
+                }
             }
         }
-        true
     }
 
     #[test]
