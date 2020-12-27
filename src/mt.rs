@@ -537,7 +537,7 @@ mod tests {
     }
 
     #[test]
-    fn recovery() {
+    fn recovery_via_from() {
         let mut buf = [0; 4];
         for _ in 0..100 {
             getrandom::getrandom(&mut buf).unwrap();
@@ -561,7 +561,31 @@ mod tests {
     }
 
     #[test]
-    fn recover_required_exact_sample_length() {
+    fn recovery_via_recover() {
+        let mut buf = [0; 4];
+        for _ in 0..100 {
+            getrandom::getrandom(&mut buf).unwrap();
+            let seed = u32::from_le_bytes(buf);
+            for skip in 0..256 {
+                let mut orig_mt = Mt19937GenRand32::new(seed);
+                // skip some samples so the RNG is in an intermediate state
+                for _ in 0..skip {
+                    orig_mt.next_u32();
+                }
+                let mut samples = [0; 624];
+                for sample in samples.iter_mut() {
+                    *sample = orig_mt.next_u32();
+                }
+                let mut recovered_mt = Mt19937GenRand32::recover(samples.iter().copied()).unwrap();
+                for _ in 0..624 * 2 {
+                    assert_eq!(orig_mt.next_u32(), recovered_mt.next_u32());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn recover_required_exact_sample_length_via_from() {
         assert_eq!(
             Mt19937GenRand32::try_from(&[0; 0][..]),
             Err(RecoverRngError::TooFewSamples(N))
@@ -581,6 +605,31 @@ mod tests {
         );
         assert_eq!(
             Mt19937GenRand32::try_from(&[0; 1000][..]),
+            Err(RecoverRngError::TooManySamples(N))
+        );
+    }
+
+    #[test]
+    fn recover_required_exact_sample_length_via_recover() {
+        assert_eq!(
+            Mt19937GenRand32::recover([0; 0].iter().copied()),
+            Err(RecoverRngError::TooFewSamples(N))
+        );
+        assert_eq!(
+            Mt19937GenRand32::recover([0; 1].iter().copied()),
+            Err(RecoverRngError::TooFewSamples(N))
+        );
+        assert_eq!(
+            Mt19937GenRand32::recover([0; 623].iter().copied()),
+            Err(RecoverRngError::TooFewSamples(N))
+        );
+        assert!(Mt19937GenRand32::recover([0; 624].iter().copied()).is_ok());
+        assert_eq!(
+            Mt19937GenRand32::recover([0; 625].iter().copied()),
+            Err(RecoverRngError::TooManySamples(N))
+        );
+        assert_eq!(
+            Mt19937GenRand32::recover([0; 1000].iter().copied()),
             Err(RecoverRngError::TooManySamples(N))
         );
     }
