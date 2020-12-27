@@ -29,8 +29,7 @@ std = []
 rand_core = { version = "0.5", default-features = false, optional = true }
 
 [dev-dependencies]
-quickcheck = { version = "0.9", default-features = false }
-quickcheck_macros = "0.9"
+getrandom = { version = "0.2", default-features = false }
 version-sync = "0.9"
 
 [package.metadata.docs.rs]
