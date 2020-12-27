@@ -1,6 +1,6 @@
 [package]
 name = "rand_mt"
-version = "3.0.0" # remember to set `html_root_url` in `src/lib.rs`.
+version = "4.0.0" # remember to set `html_root_url` in `src/lib.rs`.
 authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
