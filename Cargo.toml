@@ -26,7 +26,7 @@ rand-traits = ["rand_core"]
 std = []
 
 [dependencies]
-rand_core = { version = "0.5", default-features = false, optional = true }
+rand_core = { version = "0.6", default-features = false, optional = true }
 
 [dev-dependencies]
 getrandom = { version = "0.2", default-features = false }
