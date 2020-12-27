@@ -26,7 +26,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "3"
+rand_mt = "4"
 ```
 
 Then create a RNG like:
