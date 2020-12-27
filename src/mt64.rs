@@ -11,6 +11,7 @@
 
 use core::convert::TryFrom;
 use core::fmt;
+use core::mem::size_of;
 use core::num::Wrapping;
 
 use crate::RecoverRngError;
@@ -284,16 +285,17 @@ impl Mt19937GenRand64 {
     /// ```
     #[inline]
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
+        const CHUNK: usize = size_of::<u64>();
         let mut left = dest;
-        while left.len() >= 8 {
-            let (l, r) = left.split_at_mut(8);
-            left = r;
-            let chunk: [u8; 8] = self.next_u64().to_le_bytes();
-            l.copy_from_slice(&chunk);
+        while left.len() >= CHUNK {
+            let (next, remainder) = left.split_at_mut(CHUNK);
+            left = remainder;
+            let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
+            next.copy_from_slice(&chunk);
         }
         let n = left.len();
         if n > 0 {
-            let chunk: [u8; 8] = self.next_u64().to_le_bytes();
+            let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
             left.copy_from_slice(&chunk[..n]);
         }
     }
