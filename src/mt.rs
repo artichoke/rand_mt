@@ -571,6 +571,11 @@ mod tests {
             Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
+            Mt19937GenRand32::try_from(&[0; 623][..]),
+            Err(RecoverRngError::TooFewSamples(N))
+        );
+        assert!(Mt19937GenRand32::try_from(&[0; 624][..]).is_ok());
+        assert_eq!(
             Mt19937GenRand32::try_from(&[0; 625][..]),
             Err(RecoverRngError::TooManySamples(N))
         );
