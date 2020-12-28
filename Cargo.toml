@@ -11,7 +11,7 @@ homepage = "https://github.com/artichoke/rand_mt"
 description = "Reference Mersenne Twister random number generators."
 keywords = ["random", "rand", "rng", "mt"]
 categories = ["algorithms", "no-std"]
-include = ["**/*.rs", "LICENSE-APACHE", "LICENSE-MIT", "README.md"]
+include = ["src/**/*", "LICENSE-*", "README.md"]
 
 [features]
 default = ["rand-traits", "std"]
