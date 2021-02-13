@@ -268,6 +268,7 @@ impl Mt19937GenRand32 {
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
     #[inline]
+    #[allow(clippy::missing_panics_doc)]
     pub fn next_u32(&mut self) -> u32 {
         // Failing this check indicates that, somehow, the structure
         // was not initialized.

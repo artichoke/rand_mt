@@ -233,6 +233,7 @@ impl Mt19937GenRand64 {
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
+    #[allow(clippy::missing_panics_doc)]
     pub fn next_u64(&mut self) -> u64 {
         // Failing this check indicates that, somehow, the structure
         // was not initialized.
