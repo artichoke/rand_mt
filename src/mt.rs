@@ -273,7 +273,6 @@ impl Mt19937GenRand32 {
         // Failing this check indicates that, somehow, the structure
         // was not initialized.
         debug_assert!(self.idx != 0);
-        debug_assert!(self.idx < self.state.len());
         if self.idx >= N {
             fill_next_state(self);
         }
