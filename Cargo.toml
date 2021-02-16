@@ -20,7 +20,10 @@ rand-traits = ["rand_core"]
 std = []
 
 [dependencies]
-rand_core = { version = "0.6", default-features = false, optional = true }
+# 0.6.1 is vulnerable to underfilling a buffer.
+#
+# https://rustsec.org/advisories/RUSTSEC-2021-0023
+rand_core = { version = "0.6.2", default-features = false, optional = true }
 
 [dev-dependencies]
 getrandom = { version = "0.2", default-features = false }
