@@ -8,10 +8,11 @@ AllCops:
     - "**/node_modules/**/*"
     - "**/target/**/*"
     - "**/vendor/**/*"
+Layout/EndOfLine:
+  EnforcedStyle: lf
 Layout/LineLength:
   Enabled: true
   Exclude:
-    - "scripts/gen_case_lookups.rb"
     - "**/Rakefile"
 Metrics:
   Enabled: false
