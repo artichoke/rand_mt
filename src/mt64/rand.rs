@@ -95,7 +95,7 @@ impl RngCore for Mt19937GenRand64 {
     /// ```
     #[inline]
     fn fill_bytes(&mut self, dest: &mut [u8]) {
-        Self::fill_bytes(self, dest)
+        Self::fill_bytes(self, dest);
     }
 
     /// Fill a buffer with bytes generated from the RNG.
