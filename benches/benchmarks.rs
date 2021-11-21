@@ -33,7 +33,7 @@ mod mt19937_64 {
     fn benchmark_fill_next_state(b: &mut ::test::Bencher) {
         b.iter(|| {
             let mut mt = Mt64::new_unseeded();
-            // Note that the first call to next_u32() triggers a call
+            // Note that the first call to next_u64() triggers a call
             // to the fill_next_state() method, which is really what I
             // want to benchmark here.
             mt.next_u64();
