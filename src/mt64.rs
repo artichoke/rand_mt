@@ -286,17 +286,19 @@ impl Mt19937GenRand64 {
     #[inline]
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         const CHUNK: usize = size_of::<u64>();
-        let mut left = dest;
-        while left.len() >= CHUNK {
-            let (next, remainder) = left.split_at_mut(CHUNK);
-            left = remainder;
+        let mut left = dest.chunks_exact_mut(CHUNK);
+
+        for next in &mut left {
             let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
             next.copy_from_slice(&chunk);
         }
-        let n = left.len();
+
+        let remainder = left.into_remainder();
+        let n = remainder.len();
+
         if n > 0 {
             let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
-            left.copy_from_slice(&chunk[..n]);
+            remainder.copy_from_slice(&chunk[..n]);
         }
     }
 
