@@ -303,20 +303,20 @@ impl Mt19937GenRand32 {
     #[inline]
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         const CHUNK: usize = size_of::<u32>();
-        let mut left = dest.chunks_exact_mut(CHUNK);
+        let mut dest_chunks = dest.chunks_exact_mut(CHUNK);
 
-        for next in &mut left {
+        for next in &mut dest_chunks {
             let chunk: [u8; CHUNK] = self.next_u32().to_le_bytes();
             next.copy_from_slice(&chunk);
         }
 
-        let remainder = left.into_remainder();
-        let n = remainder.len();
-
-        if n > 0 {
-            let chunk: [u8; CHUNK] = self.next_u32().to_le_bytes();
-            remainder.copy_from_slice(&chunk[..n]);
-        }
+        dest_chunks
+            .into_remainder()
+            .iter_mut()
+            .zip(self.next_u32().to_le_bytes().iter())
+            .for_each(|(cell, &byte)| {
+                *cell = byte;
+            });
     }
 
     /// Attempt to recover the internal state of a Mersenne Twister using the
