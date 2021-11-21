@@ -286,18 +286,20 @@ impl Mt19937GenRand64 {
     #[inline]
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         const CHUNK: usize = size_of::<u64>();
-        let mut left = dest;
-        while left.len() >= CHUNK {
-            let (next, remainder) = left.split_at_mut(CHUNK);
-            left = remainder;
+        let mut dest_chunks = dest.chunks_exact_mut(CHUNK);
+
+        for next in &mut dest_chunks {
             let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
             next.copy_from_slice(&chunk);
         }
-        let n = left.len();
-        if n > 0 {
-            let chunk: [u8; CHUNK] = self.next_u64().to_le_bytes();
-            left.copy_from_slice(&chunk[..n]);
-        }
+
+        dest_chunks
+            .into_remainder()
+            .iter_mut()
+            .zip(self.next_u64().to_le_bytes().iter())
+            .for_each(|(cell, &byte)| {
+                *cell = byte;
+            });
     }
 
     /// Attempt to recover the internal state of a Mersenne Twister using the
