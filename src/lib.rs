@@ -85,7 +85,7 @@
 //! [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
 
 #![doc(html_root_url = "https://docs.rs/rand_mt/4.0.1")]
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
 // Ensure code blocks in README.md compile
 #[cfg(doctest)]
@@ -100,6 +100,9 @@ macro_rules! readme {
 }
 #[cfg(doctest)]
 readme!();
+
+#[cfg(feature = "std")]
+extern crate std;
 
 use core::fmt;
 
