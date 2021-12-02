@@ -310,8 +310,11 @@ impl Mt19937GenRand32 {
             next.copy_from_slice(&chunk);
         }
 
-        dest_chunks
-            .into_remainder()
+        let remainder = dest_chunks.into_remainder();
+        if remainder.is_empty() {
+            return;
+        }
+        remainder
             .iter_mut()
             .zip(self.next_u32().to_le_bytes().iter())
             .for_each(|(cell, &byte)| {
