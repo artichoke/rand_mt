@@ -26,7 +26,7 @@ std = []
 rand_core = { version = "0.6.2", default-features = false, optional = true }
 
 [dev-dependencies]
-getrandom = { version = "0.2", default-features = false }
+getrandom = { version = "0.2.0", default-features = false }
 
 # Check that crate versions are properly updated in documentation and code when
 # bumping the version.
@@ -38,4 +38,6 @@ features = ["markdown_deps_updated", "html_root_url_updated"]
 [package.metadata.docs.rs]
 # This sets the default target to `x86_64-unknown-linux-gnu` and only builds
 # that target. `rand_mt` has the same API and code on all targets.
-targets = ["x86_64-unknown-linux-gnu"]
+default-target = "x86_64-unknown-linux-gnu"
+targets = []
+rustdoc-args = ["--cfg", "docsrs"]

@@ -20,6 +20,12 @@
 #![warn(unused_qualifications)]
 #![warn(variant_size_differences)]
 #![forbid(unsafe_code)]
+// Enable feature callouts in generated documentation:
+// https://doc.rust-lang.org/beta/unstable-book/language-features/doc-cfg.html
+//
+// This approach is borrowed from tokio.
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_alias))]
 
 //! Mersenne Twister random number generators.
 //!
