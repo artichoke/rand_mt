@@ -68,7 +68,7 @@ releases.
 
 [mersenne twister website]:
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
-[default prng in ruby]: https://ruby-doc.org/core-2.6.3/Random.html
+[default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
 [rand_core]: https://crates.io/crates/rand_core
 [`rand_core`]: https://crates.io/crates/rand_core
 [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html

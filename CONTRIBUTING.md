@@ -3,8 +3,11 @@
 👋 Hi and welcome to [Artichoke]. Thanks for taking the time to contribute!
 💪💎🙌
 
-Artichoke aspires to be a Ruby 2.6.3-compatible implementation of the Ruby
-programming language. [There is lots to do].
+Artichoke aspires to be a [recent MRI Ruby][mri-target]-compatible
+implementation of the Ruby programming language. [There is lots to do].
+
+[mri-target]:
+  https://github.com/artichoke/artichoke/blob/trunk/RUBYSPEC.md#mri-target
 
 rand_mt is used to implement the default psuedorandom number generator that
 backs the [`Random` core class].
@@ -204,7 +207,7 @@ Regular dependency bumps are handled by [@dependabot].
 
 [artichoke]: https://github.com/artichoke
 [there is lots to do]: https://github.com/artichoke/artichoke/issues
-[`random` core class]: https://ruby-doc.org/core-2.6.3/Random.html
+[`random` core class]: https://ruby-doc.org/core-3.1.2/Random.html
 [filed an issue so we can fix it]:
   https://github.com/artichoke/artichoke/issues/new
 [file bugs specific to rand_mt in this repository]:
