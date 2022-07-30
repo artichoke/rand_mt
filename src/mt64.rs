@@ -586,7 +586,7 @@ mod tests {
             Mt19937GenRand64::try_from(&[0; 311][..]),
             Err(RecoverRngError::TooFewSamples(NN))
         );
-        assert!(Mt19937GenRand64::try_from(&[0; 312][..]).is_ok());
+        Mt19937GenRand64::try_from(&[0; 312][..]).unwrap();
         assert_eq!(
             Mt19937GenRand64::try_from(&[0; 313][..]),
             Err(RecoverRngError::TooManySamples(NN))
@@ -611,7 +611,7 @@ mod tests {
             Mt19937GenRand64::recover([0; 311].iter().copied()),
             Err(RecoverRngError::TooFewSamples(NN))
         );
-        assert!(Mt19937GenRand64::recover([0; 312].iter().copied()).is_ok());
+        Mt19937GenRand64::recover([0; 312].iter().copied()).unwrap();
         assert_eq!(
             Mt19937GenRand64::recover([0; 313].iter().copied()),
             Err(RecoverRngError::TooManySamples(NN))
