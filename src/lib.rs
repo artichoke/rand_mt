@@ -90,7 +90,7 @@
 //! [`rand_core`]: https://crates.io/crates/rand_core
 //! [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/4.1.2")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/4.1.3")]
 #![no_std]
 
 // Ensure code blocks in README.md compile
@@ -166,3 +166,28 @@ impl fmt::Display for RecoverRngError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for RecoverRngError {}
+
+#[cfg(test)]
+mod tests {
+    #[cfg(feature = "std")]
+    use super::RecoverRngError;
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn error_display_is_not_empty() {
+        use core::fmt::Write as _;
+        use std::string::String;
+
+        let test_cases = [
+            RecoverRngError::TooFewSamples(0),
+            RecoverRngError::TooFewSamples(124),
+            RecoverRngError::TooManySamples(0),
+            RecoverRngError::TooManySamples(987),
+        ];
+        for tc in test_cases {
+            let mut buf = String::new();
+            write!(&mut buf, "{}", tc).unwrap();
+            assert!(!buf.is_empty());
+        }
+    }
+}
