@@ -107,6 +107,23 @@ impl From<u32> for Mt19937GenRand32 {
     ///
     /// This function is equivalent to [`new`].
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand32;
+    /// // Default MT seed
+    /// let seed = 5489_u32;
+    /// let mt1 = Mt19937GenRand32::from(seed);
+    /// let mt2 = Mt19937GenRand32::new(seed);
+    /// assert_eq!(mt1, mt2);
+    ///
+    /// // Non-default MT seed
+    /// let seed = 9927_u32;
+    /// let mt1 = Mt19937GenRand32::from(seed);
+    /// let mt2 = Mt19937GenRand32::new(seed);
+    /// assert_eq!(mt1, mt2);
+    /// ```
+    ///
     /// [`new`]: Self::new
     #[inline]
     fn from(seed: u32) -> Self {

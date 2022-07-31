@@ -91,6 +91,23 @@ impl From<u64> for Mt19937GenRand64 {
     ///
     /// This function is equivalent to [`new`].
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rand_mt::Mt19937GenRand64;
+    /// // Default MT seed
+    /// let seed = 5489_u64;
+    /// let mt1 = Mt19937GenRand64::from(seed);
+    /// let mt2 = Mt19937GenRand64::new(seed);
+    /// assert_eq!(mt1, mt2);
+    ///
+    /// // Non-default MT seed
+    /// let seed = 9927_u64;
+    /// let mt1 = Mt19937GenRand64::from(seed);
+    /// let mt2 = Mt19937GenRand64::new(seed);
+    /// assert_eq!(mt1, mt2);
+    /// ```
+    ///
     /// [`new`]: Self::new
     #[inline]
     fn from(seed: u64) -> Self {
