@@ -57,7 +57,7 @@ pub struct Mt19937GenRand32 {
 impl fmt::Debug for Mt19937GenRand32 {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Mt19937GenRand64 {}")
+        f.write_str("Mt19937GenRand32 {}")
     }
 }
 
@@ -639,5 +639,26 @@ mod tests {
             Mt19937GenRand32::recover([0; 1000].iter().copied()),
             Err(RecoverRngError::TooManySamples(N))
         );
+    }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn fmt_debug_does_not_leak_seed() {
+        use core::fmt::Write as _;
+        use std::string::String;
+
+        let random = Mt19937GenRand32::new(874);
+
+        let mut buf = String::new();
+        write!(&mut buf, "{:?}", random).unwrap();
+        assert!(!buf.contains("874"));
+        assert_eq!(buf, "Mt19937GenRand32 {}");
+
+        let random = Mt19937GenRand32::new(123_456);
+
+        let mut buf = String::new();
+        write!(&mut buf, "{:?}", random).unwrap();
+        assert!(!buf.contains("123456"));
+        assert_eq!(buf, "Mt19937GenRand32 {}");
     }
 }

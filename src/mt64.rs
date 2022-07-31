@@ -621,4 +621,25 @@ mod tests {
             Err(RecoverRngError::TooManySamples(NN))
         );
     }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn fmt_debug_does_not_leak_seed() {
+        use core::fmt::Write as _;
+        use std::string::String;
+
+        let random = Mt19937GenRand64::new(874);
+
+        let mut buf = String::new();
+        write!(&mut buf, "{:?}", random).unwrap();
+        assert!(!buf.contains("874"));
+        assert_eq!(buf, "Mt19937GenRand64 {}");
+
+        let random = Mt19937GenRand64::new(123_456);
+
+        let mut buf = String::new();
+        write!(&mut buf, "{:?}", random).unwrap();
+        assert!(!buf.contains("123456"));
+        assert_eq!(buf, "Mt19937GenRand64 {}");
+    }
 }
