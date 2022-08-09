@@ -1,4 +1,4 @@
-// src/mt19937_64.rs
+// src/mt64.rs
 //
 // Copyright (c) 2015,2017 rust-mersenne-twister developers
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
