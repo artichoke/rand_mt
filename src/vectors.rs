@@ -1,4 +1,4 @@
-// tests/version_numbers.rs
+// src/vectors.rs
 //
 // Copyright (c) 2015,2017 rust-mersenne-twister developers
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
@@ -9,12 +9,5 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-#[test]
-fn test_readme_deps() {
-    version_sync::assert_markdown_deps_updated!("README.md");
-}
-
-#[test]
-fn test_html_root_url() {
-    version_sync::assert_html_root_url_updated!("src/lib.rs");
-}
+pub mod mt;
+pub mod mt64;
