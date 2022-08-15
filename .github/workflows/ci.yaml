@@ -46,7 +46,7 @@ jobs:
         run: cargo test --no-default-features
 
   build-msrv:
-    name: Build (1.47.0)
+    name: Build (MSRV)
     runs-on: ubuntu-latest
     env:
       RUSTFLAGS: -D warnings
@@ -60,6 +60,7 @@ jobs:
         with:
           toolchain: "1.47.0"
           profile: minimal
+          override: true
 
       - name: Compile
         run: cargo build --verbose
