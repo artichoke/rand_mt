@@ -65,16 +65,21 @@ jobs:
       - name: Compile
         run: cargo build --verbose
 
+      # skip tests because dev dependencies have a higher MSRV than rand_mt does.
       - name: Compile tests
+        if: false
         run: cargo test --no-run
 
       - name: Test
+        if: false
         run: cargo test
 
       - name: Test with all features
+        if: false
         run: cargo test --all-features
 
       - name: Test with no default features
+        if: false
         run: cargo test --no-default-features
 
   rust:
