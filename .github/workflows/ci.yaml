@@ -46,7 +46,7 @@ jobs:
         run: cargo test --no-default-features
 
   build-msrv:
-    name: Build (1.47.0)
+    name: Build (MSRV)
     runs-on: ubuntu-latest
     env:
       RUSTFLAGS: -D warnings
@@ -60,20 +60,26 @@ jobs:
         with:
           toolchain: "1.47.0"
           profile: minimal
+          override: true
 
       - name: Compile
         run: cargo build --verbose
 
+      # skip tests because dev dependencies have a higher MSRV than rand_mt does.
       - name: Compile tests
+        if: false
         run: cargo test --no-run
 
       - name: Test
+        if: false
         run: cargo test
 
       - name: Test with all features
+        if: false
         run: cargo test --all-features
 
       - name: Test with no default features
+        if: false
         run: cargo test --no-default-features
 
   rust:
