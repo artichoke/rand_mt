@@ -4,8 +4,8 @@
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
-// <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
-// license <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// <LICENSE-APACHE> or <http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+// license <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
@@ -59,8 +59,8 @@ impl RngCore for Mt19937GenRand64 {
 
     /// Generate next `u32` output.
     ///
-    /// This function is implemented by generating one `u64`s from the RNG and
-    /// shifting + masking them into a `u32` output.
+    /// This function is implemented by generating one `u64` from the RNG and
+    /// performing shifting and masking to turn it into a `u32` output.
     ///
     /// # Examples
     ///

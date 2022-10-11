@@ -4,8 +4,8 @@
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
-// <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
-// license <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// <LICENSE-APACHE> or <http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+// license <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
@@ -42,9 +42,9 @@
 //!   `MT19937` and produces 64-bit output. This is a good choice on 64-bit
 //!   CPUs.
 //!
-//! Both of these use 2.5KB of state. [`Mt19937GenRand32`] uses a 32-bit seed.
-//! [`Mt19937GenRand64`] uses a 64-bit seed. Both can be seeded from an iterator
-//! of seeds.
+//! Both of these RNGs use approximately 2.5 kilobytes of state.
+//! [`Mt19937GenRand32`] uses a 32-bit seed. [`Mt19937GenRand64`] uses a 64-bit
+//! seed. Both can be seeded from an iterator of seeds.
 //!
 //! Both RNGs implement a `recover` constructor which can reconstruct the RNG
 //! state from a sequence of output samples.
@@ -83,14 +83,26 @@
 //!   this feature enables [`std::error::Error`] impls on error types in this
 //!   crate.
 //!
-//! Mersenne Twister requires ~2.5KB of internal state. To make the RNGs
-//! implemented in this crate practical to embed in other structs, you may wish
-//! to store the RNG in a `Box`.
+//! Mersenne Twister requires approximately 2.5 kilobytes of internal state. To
+//! make the RNGs implemented in this crate practical to embed in other structs,
+//! you may wish to store the RNG in a [`Box`].
 //!
-//! [`rand_core`]: https://crates.io/crates/rand_core
-//! [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
+#![cfg_attr(
+    not(feature = "std"),
+    doc = "[`std::error::Error`]: https://doc.rust-lang.org/std/error/trait.Error.html"
+)]
+#![cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
+#![cfg_attr(
+    not(feature = "std"),
+    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+)]
+#![cfg_attr(
+    not(feature = "rand_core"),
+    doc = "[`rand_core`]: https://crates.io/crates/rand_core"
+)]
+//!
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/4.2.0")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/4.2.1")]
 #![no_std]
 
 #[cfg(feature = "std")]
@@ -178,7 +190,7 @@ mod tests {
     }
 }
 
-// Ensure code blocks in README.md compile
+// Ensure code blocks in `README.md` compile.
 //
 // This module and macro declaration should be kept at the end of the file, in
 // order to not interfere with code coverage.

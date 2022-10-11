@@ -4,8 +4,8 @@
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
-// <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
-// license <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// <LICENSE-APACHE> or <http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+// license <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
@@ -31,9 +31,9 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 ///
 /// # Size
 ///
-/// `Mt19937GenRand64` requires approximately 2.5KB of internal state.
+/// `Mt19937GenRand64` requires approximately 2.5 kilobytes of internal state.
 ///
-/// You may wish to store an `Mt19937GenRand64` on the heap in a `Box` to make it
+/// You may wish to store an `Mt19937GenRand64` on the heap in a [`Box`] to make it
 /// easier to embed in another struct.
 ///
 /// `Mt19937GenRand64` is also the same size as
@@ -45,6 +45,11 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 /// assert_eq!(2504, mem::size_of::<Mt19937GenRand64>());
 /// assert_eq!(mem::size_of::<Mt19937GenRand32>(), mem::size_of::<Mt19937GenRand64>());
 /// ```
+#[cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
+#[cfg_attr(
+    not(feature = "std"),
+    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+)]
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Mt19937GenRand64 {
     idx: usize,
@@ -264,8 +269,8 @@ impl Mt19937GenRand64 {
 
     /// Generate next `u32` output.
     ///
-    /// This function is implemented by generating one `u64`s from the RNG and
-    /// shifting + masking them into a `u32` output.
+    /// This function is implemented by generating one `u64` from the RNG and
+    /// performing shifting and masking to turn it into a `u32` output.
     ///
     /// # Examples
     ///
@@ -439,18 +444,18 @@ fn temper(mut x: u64) -> u64 {
 
 #[inline]
 fn untemper(mut x: u64) -> u64 {
-    // reverse "x ^=  x >> 43;"
+    // reverse `x ^=  x >> 43;`
     x ^= x >> 43;
 
-    // reverse "x ^= (x << 37) & 0xfff7_eee0_0000_0000;"
+    // reverse `x ^= (x << 37) & 0xfff7_eee0_0000_0000;`
     x ^= (x << 37) & 0xfff7_eee0_0000_0000;
 
-    // reverse "x ^= (x << 17) & 0x71d6_7fff_eda6_0000;"
+    // reverse `x ^= (x << 17) & 0x71d6_7fff_eda6_0000;`
     x ^= (x << 17) & 0x0000_0003_eda6_0000;
     x ^= (x << 17) & 0x0006_7ffc_0000_0000;
     x ^= (x << 17) & 0x71d0_0000_0000_0000;
 
-    // reverse "x ^= (x >> 29) & 0x5555_5555_5555_5555;"
+    // reverse `x ^= (x >> 29) & 0x5555_5555_5555_5555;`
     x ^= (x >> 29) & 0x0000_0005_5555_5540;
     x ^= (x >> 29) & 0x0000_0000_0000_0015;
 

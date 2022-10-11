@@ -4,8 +4,8 @@
 // Copyright (c) 2020 Ryan Lopopolo <rjl@hyperbo.la>
 //
 // Licensed under the Apache License, Version 2.0
-// <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
-// license <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// <LICENSE-APACHE> or <http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+// license <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
@@ -33,9 +33,9 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 ///
 /// # Size
 ///
-/// `Mt19937GenRand32` requires approximately 2.5KB of internal state.
+/// `Mt19937GenRand32` requires approximately 2.5 kilobytes of internal state.
 ///
-/// You may wish to store an `Mt19937GenRand32` on the heap in a `Box` to make
+/// You may wish to store an `Mt19937GenRand32` on the heap in a [`Box`] to make
 /// it easier to embed in another struct.
 ///
 /// `Mt19937GenRand32` is also the same size as
@@ -47,6 +47,11 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 /// assert_eq!(2504, mem::size_of::<Mt19937GenRand32>());
 /// assert_eq!(mem::size_of::<Mt19937GenRand64>(), mem::size_of::<Mt19937GenRand32>());
 /// ```
+#[cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
+#[cfg_attr(
+    not(feature = "std"),
+    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+)]
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[allow(clippy::module_name_repetitions)]
 pub struct Mt19937GenRand32 {
@@ -256,7 +261,7 @@ impl Mt19937GenRand32 {
     /// Generate next `u64` output.
     ///
     /// This function is implemented by generating two `u32`s from the RNG and
-    /// shifting + masking them into a `u64` output.
+    /// performing shifting and masking to turn them into a `u64` output.
     ///
     /// # Examples
     ///
@@ -455,20 +460,20 @@ fn temper(mut x: u32) -> u32 {
 
 #[inline]
 fn untemper(mut x: u32) -> u32 {
-    // reverse "x ^=  x>>18;"
+    // reverse `x ^=  x>>18;`
     x ^= x >> 18;
 
-    // reverse "x ^= (x<<15) & 0xefc6_0000;"
+    // reverse `x ^= (x<<15) & 0xefc6_0000;`
     x ^= (x << 15) & 0x2fc6_0000;
     x ^= (x << 15) & 0xc000_0000;
 
-    // reverse "x ^= (x<< 7) & 0x9d2c_5680;"
+    // reverse `x ^= (x<< 7) & 0x9d2c_5680;`
     x ^= (x << 7) & 0x0000_1680;
     x ^= (x << 7) & 0x000c_4000;
     x ^= (x << 7) & 0x0d20_0000;
     x ^= (x << 7) & 0x9000_0000;
 
-    // reverse "x ^=  x>>11;"
+    // reverse `x ^=  x>>11;`
     x ^= x >> 11;
     x ^= x >> 22;
 

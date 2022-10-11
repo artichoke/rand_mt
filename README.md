@@ -8,7 +8,7 @@
 [![API](https://docs.rs/rand_mt/badge.svg)](https://docs.rs/rand_mt)
 [![API trunk](https://img.shields.io/badge/docs-trunk-blue.svg)](https://artichoke.github.io/rand_mt/rand_mt/)
 
-Implemenents a selection of Mersenne Twister random number generators.
+Implements a selection of Mersenne Twister random number generators.
 
 > A very fast random number generator of period 2<sup>19937</sup>-1. (Makoto
 > Matsumoto, 1997).
@@ -17,7 +17,7 @@ The Mersenne Twister algorithms are not suitable for cryptographic uses, but are
 ubiquitous. See the [Mersenne Twister website]. A variant of Mersenne Twister is
 the [default PRNG in Ruby].
 
-This crate optionally depends on [rand_core] and implements `RngCore` on the
+This crate optionally depends on [`rand_core`] and implements `RngCore` on the
 RNGs in this crate.
 
 ## Usage
@@ -26,7 +26,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "4.2.0"
+rand_mt = "4.2.1"
 ```
 
 Then create a RNG like:
@@ -48,9 +48,9 @@ are enabled by default:
 - **std** - Enables a dependency on the Rust Standard Library. Activating this
   feature enables [`std::error::Error`] impls on error types in this crate.
 
-Mersenne Twister requires ~2.5KB of internal state. To make the RNGs implemented
-in this crate practical to embed in other structs, you may wish to store the RNG
-in a `Box`.
+Mersenne Twister requires approximately 2.5 kilobytes of internal state. To make
+the RNGs implemented in this crate practical to embed in other structs, you may
+wish to store the RNG in a `Box`.
 
 ### Minimum Supported Rust Version
 
@@ -69,7 +69,7 @@ releases.
 [mersenne twister website]:
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 [default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
-[rand_core]: https://crates.io/crates/rand_core
+[`rand_core`]: https://crates.io/crates/rand_core
 [`rand_core`]: https://crates.io/crates/rand_core
 [`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
 [`1.1.1`]: https://github.com/dcrewi/rust-mersenne-twister/tree/1.1.1
