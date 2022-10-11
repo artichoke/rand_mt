@@ -460,20 +460,20 @@ fn temper(mut x: u32) -> u32 {
 
 #[inline]
 fn untemper(mut x: u32) -> u32 {
-    // reverse "x ^=  x>>18;"
+    // reverse `x ^=  x>>18;`
     x ^= x >> 18;
 
-    // reverse "x ^= (x<<15) & 0xefc6_0000;"
+    // reverse `x ^= (x<<15) & 0xefc6_0000;`
     x ^= (x << 15) & 0x2fc6_0000;
     x ^= (x << 15) & 0xc000_0000;
 
-    // reverse "x ^= (x<< 7) & 0x9d2c_5680;"
+    // reverse `x ^= (x<< 7) & 0x9d2c_5680;`
     x ^= (x << 7) & 0x0000_1680;
     x ^= (x << 7) & 0x000c_4000;
     x ^= (x << 7) & 0x0d20_0000;
     x ^= (x << 7) & 0x9000_0000;
 
-    // reverse "x ^=  x>>11;"
+    // reverse `x ^=  x>>11;`
     x ^= x >> 11;
     x ^= x >> 22;
 
