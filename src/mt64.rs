@@ -31,9 +31,9 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 ///
 /// # Size
 ///
-/// `Mt19937GenRand64` requires approximately 2.5KB of internal state.
+/// `Mt19937GenRand64` requires approximately 2.5 kilobytes of internal state.
 ///
-/// You may wish to store an `Mt19937GenRand64` on the heap in a `Box` to make it
+/// You may wish to store an `Mt19937GenRand64` on the heap in a [`Box`] to make it
 /// easier to embed in another struct.
 ///
 /// `Mt19937GenRand64` is also the same size as
@@ -45,6 +45,11 @@ const LM: Wrapping<u64> = Wrapping(0x7fff_ffff); // Least significant 31 bits
 /// assert_eq!(2504, mem::size_of::<Mt19937GenRand64>());
 /// assert_eq!(mem::size_of::<Mt19937GenRand32>(), mem::size_of::<Mt19937GenRand64>());
 /// ```
+#[cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
+#[cfg_attr(
+    not(feature = "std"),
+    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+)]
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Mt19937GenRand64 {
     idx: usize,
@@ -264,8 +269,8 @@ impl Mt19937GenRand64 {
 
     /// Generate next `u32` output.
     ///
-    /// This function is implemented by generating one `u64`s from the RNG and
-    /// shifting + masking them into a `u32` output.
+    /// This function is implemented by generating one `u64` from the RNG and
+    /// performing shifting and masking to turn it into a `u32` output.
     ///
     /// # Examples
     ///

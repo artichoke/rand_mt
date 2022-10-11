@@ -42,7 +42,7 @@ impl RngCore for Mt19937GenRand32 {
     /// Generate next `u64` output.
     ///
     /// This function is implemented by generating two `u32`s from the RNG and
-    /// shifting + masking them into a `u64` output.
+    /// performing shifting and masking to turn them into a `u64` output.
     ///
     /// # Examples
     ///

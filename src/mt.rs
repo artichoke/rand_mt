@@ -33,9 +33,9 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 ///
 /// # Size
 ///
-/// `Mt19937GenRand32` requires approximately 2.5KB of internal state.
+/// `Mt19937GenRand32` requires approximately 2.5 kilobytes of internal state.
 ///
-/// You may wish to store an `Mt19937GenRand32` on the heap in a `Box` to make
+/// You may wish to store an `Mt19937GenRand32` on the heap in a [`Box`] to make
 /// it easier to embed in another struct.
 ///
 /// `Mt19937GenRand32` is also the same size as
@@ -47,6 +47,11 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 /// assert_eq!(2504, mem::size_of::<Mt19937GenRand32>());
 /// assert_eq!(mem::size_of::<Mt19937GenRand64>(), mem::size_of::<Mt19937GenRand32>());
 /// ```
+#[cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
+#[cfg_attr(
+    not(feature = "std"),
+    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+)]
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[allow(clippy::module_name_repetitions)]
 pub struct Mt19937GenRand32 {
@@ -256,7 +261,7 @@ impl Mt19937GenRand32 {
     /// Generate next `u64` output.
     ///
     /// This function is implemented by generating two `u32`s from the RNG and
-    /// shifting + masking them into a `u64` output.
+    /// performing shifting and masking to turn them into a `u64` output.
     ///
     /// # Examples
     ///
