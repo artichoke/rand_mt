@@ -510,7 +510,7 @@ mod tests {
 
     #[test]
     fn seed_with_empty_iter_returns() {
-        let _ = Mt19937GenRand64::new_with_key(core::iter::empty());
+        let _rng = Mt19937GenRand64::new_with_key(core::iter::empty());
     }
 
     #[test]
