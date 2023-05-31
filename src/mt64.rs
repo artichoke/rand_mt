@@ -664,4 +664,15 @@ mod tests {
         assert!(!buf.contains("123456"));
         assert_eq!(buf, "Mt19937GenRand64 {}");
     }
+
+    #[test]
+    fn default_is_new_unseeded() {
+        let mut default = Mt19937GenRand64::default();
+        let mut unseeded = Mt19937GenRand64::new_unseeded();
+
+        assert_eq!(default, unseeded);
+        for _ in 0..1024 {
+            assert_eq!(default.next_u64(), unseeded.next_u64());
+        }
+    }
 }
