@@ -12,5 +12,6 @@ target/
 !*.yaml
 !*.yml
 
+mutants.out*/
 **/vendor/*
 !**/vendor/*.md
