@@ -102,7 +102,7 @@
 )]
 //!
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/4.2.1")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/4.2.2")]
 #![no_std]
 
 #[cfg(feature = "std")]
