@@ -1,6 +1,6 @@
 [package]
 name = "rand_mt"
-version = "4.2.1" # remember to set `html_root_url` in `src/lib.rs`.
+version = "4.2.2" # remember to set `html_root_url` in `src/lib.rs`.
 authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
@@ -11,7 +11,7 @@ documentation = "https://docs.rs/rand_mt"
 homepage = "https://github.com/artichoke/rand_mt"
 description = "Reference Mersenne Twister random number generators."
 keywords = ["random", "rand", "rng", "mt"]
-categories = ["algorithms", "no-std"]
+categories = ["algorithms", "no-std", "no-std::no-alloc"]
 include = ["src/**/*", "tests/**/*", "LICENSE-*", "README.md"]
 
 [features]
