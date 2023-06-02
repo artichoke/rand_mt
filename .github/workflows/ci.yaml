@@ -92,7 +92,7 @@ jobs:
       - name: Install Rust toolchain
         uses: artichoke/setup-rust/lint-and-format@v1.9.0
         with:
-          toolchain: nightly
+          toolchain: stable
 
       - name: Check formatting
         run: cargo fmt --check

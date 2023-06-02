@@ -15,7 +15,7 @@ namespace :lint do
 
   desc 'Lint Rust sources with Clippy'
   task :clippy do
-    sh 'rustup run --install nightly cargo clippy --workspace --all-targets --all-features'
+    sh 'cargo clippy --workspace --all-targets --all-features'
   end
 
   desc 'Lint Rust sources with Clippy restriction pass (unenforced lints)'
