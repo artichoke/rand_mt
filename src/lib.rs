@@ -112,9 +112,11 @@ use core::fmt;
 
 pub use crate::mt::Mt19937GenRand32;
 pub use crate::mt64::Mt19937GenRand64;
+pub use crate::python::Mt19937GenRandPython;
 
 mod mt;
 mod mt64;
+mod python;
 #[cfg(test)]
 mod vectors;
 
@@ -123,6 +125,9 @@ pub type Mt = Mt19937GenRand32;
 
 /// A type alias for [`Mt19937GenRand64`], 64-bit Mersenne Twister.
 pub type Mt64 = Mt19937GenRand64;
+
+/// A type alias for [`Mt19937GenRandPython`], Python-compatible Mersenne Twiser.
+pub type MtPython = Mt19937GenRandPython;
 
 /// Error returned from fallible Mersenne Twister recovery constructors.
 ///
