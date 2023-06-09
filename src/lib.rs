@@ -187,7 +187,7 @@ mod tests {
             RecoverRngError::TooManySamples(0),
             RecoverRngError::TooManySamples(987),
         ];
-        for tc in test_cases {
+        for tc in &test_cases {
             let mut buf = String::new();
             write!(&mut buf, "{}", tc).unwrap();
             assert!(!buf.is_empty());

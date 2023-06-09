@@ -63,7 +63,8 @@ impl Mt19937GenRandPython {
     #[inline]
     #[must_use]
     pub fn new(seed: u32) -> Self {
-        Self::new_with_key([seed])
+        let key: [u32; 1] = [seed];
+        Self::new_with_key(key.iter().copied())
     }
 
     /// Create a new Mersenne Twister random number generator using the given
