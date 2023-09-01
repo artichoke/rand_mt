@@ -174,7 +174,7 @@ mod tests {
     fn output_from_u32_slice_key() {
         let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
         let mut rng = Mt19937GenRand32::new_with_key(key.iter().copied());
-        for &x in TEST_OUTPUT.iter() {
+        for &x in &TEST_OUTPUT {
             assert_eq!(x, RngCore::next_u32(&mut rng));
         }
     }

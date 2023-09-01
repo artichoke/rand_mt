@@ -170,7 +170,7 @@ mod tests {
     fn output_from_u64_slice_key() {
         let key = [0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64];
         let mut mt = Mt19937GenRand64::new_with_key(key.iter().copied());
-        for &x in TEST_OUTPUT.iter() {
+        for &x in &TEST_OUTPUT {
             assert_eq!(x, RngCore::next_u64(&mut mt));
         }
     }
