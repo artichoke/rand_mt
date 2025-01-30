@@ -1,10 +1,13 @@
 [package]
 name = "rand_mt"
-version = "4.2.2" # remember to set `html_root_url` in `src/lib.rs`.
-authors = ["David Creswick <dcrewi@gyrae.net>", "Ryan Lopopolo <rjl@hyperbo.la>"]
+version = "5.0.0" # remember to set `html_root_url` in `src/lib.rs`.
+authors = [
+    "David Creswick <dcrewi@gyrae.net>",
+    "Ryan Lopopolo <rjl@hyperbo.la>",
+]
 license = "MIT OR Apache-2.0"
-edition = "2018"
-rust-version = "1.47.0"
+edition = "2021"
+rust-version = "1.81.0"
 readme = "README.md"
 repository = "https://github.com/artichoke/rand_mt"
 documentation = "https://docs.rs/rand_mt"
@@ -12,22 +15,17 @@ homepage = "https://github.com/artichoke/rand_mt"
 description = "Reference Mersenne Twister random number generators."
 keywords = ["random", "rand", "rng", "mt"]
 categories = ["algorithms", "no-std", "no-std::no-alloc"]
-include = ["src/**/*", "tests/**/*", "LICENSE-*", "README.md"]
+include = ["/src/**/*", "/tests/**/*", "/LICENSE-*", "/README.md"]
 
 [features]
-default = ["rand-traits", "std"]
-rand-traits = ["rand_core"]
-# Enables `std::error::Error` impls.
-std = []
+default = ["rand-traits"]
+rand-traits = ["dep:rand_core"]
 
 [dependencies]
-# 0.6.1 is vulnerable to underfilling a buffer.
-#
-# https://rustsec.org/advisories/RUSTSEC-2021-0023
-rand_core = { version = "0.6.2", default-features = false, optional = true }
+rand_core = { version = "0.9.0", default-features = false, optional = true }
 
 [dev-dependencies]
-getrandom = { version = "0.2.0", default-features = false }
+getrandom = { version = "0.3.1", default-features = false }
 
 # Check that crate versions are properly updated in documentation and code when
 # bumping the version.
