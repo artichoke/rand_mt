@@ -11,7 +11,6 @@
 
 use core::convert::TryFrom;
 use core::fmt;
-use core::mem::size_of;
 use core::num::Wrapping;
 
 use crate::RecoverRngError;
@@ -33,50 +32,45 @@ const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
 ///
 /// # Size
 ///
-/// `Mt19937GenRand32` requires approximately 2.5 kilobytes of internal state.
+/// `Mt` requires approximately 2.5 kilobytes of internal state.
 ///
-/// You may wish to store an `Mt19937GenRand32` on the heap in a [`Box`] to make
-/// it easier to embed in another struct.
+/// You may wish to store an `Mt` on the heap in a [`Box`] to make it easier to
+/// embed in another struct.
 ///
-/// `Mt19937GenRand32` is also the same size as
-/// [`Mt19937GenRand64`](crate::Mt19937GenRand64).
+/// `Mt` is also the same size as [`Mt64`](crate::Mt64).
 ///
 /// ```
 /// # use core::mem;
-/// # use rand_mt::{Mt19937GenRand32, Mt19937GenRand64};
-/// assert_eq!(2504, mem::size_of::<Mt19937GenRand32>());
-/// assert_eq!(mem::size_of::<Mt19937GenRand64>(), mem::size_of::<Mt19937GenRand32>());
+/// # use rand_mt::{Mt, Mt64};
+/// assert_eq!(2504, size_of::<Mt>());
+/// assert_eq!(size_of::<Mt64>(), size_of::<Mt>());
 /// ```
-#[cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
-#[cfg_attr(
-    not(feature = "std"),
-    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
-)]
+///
+/// [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[allow(clippy::module_name_repetitions)]
-pub struct Mt19937GenRand32 {
+pub struct Mt {
     idx: usize,
     state: [Wrapping<u32>; N],
 }
 
-impl fmt::Debug for Mt19937GenRand32 {
+impl fmt::Debug for Mt {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Mt19937GenRand32 {}")
+        f.write_str("Mt {}")
     }
 }
 
-impl Default for Mt19937GenRand32 {
-    /// Return a new `Mt19937GenRand32` with the default seed.
+impl Default for Mt {
+    /// Return a new `Mt` with the default seed.
     ///
-    /// Equivalent to calling [`Mt19937GenRand32::new_unseeded`].
+    /// Equivalent to calling [`Mt::new_unseeded`].
     #[inline]
     fn default() -> Self {
         Self::new_unseeded()
     }
 }
 
-impl From<[u8; 4]> for Mt19937GenRand32 {
+impl From<[u8; 4]> for Mt {
     /// Construct a Mersenne Twister RNG from 4 bytes.
     ///
     /// The given bytes are treated as a little endian encoded `u32`.
@@ -84,21 +78,21 @@ impl From<[u8; 4]> for Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
-    /// let mut mt = Mt19937GenRand32::from(seed);
+    /// let mut mt = Mt::from(seed);
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
     ///
     /// This constructor is equivalent to passing a little endian encoded `u32`.
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
-    /// let mt1 = Mt19937GenRand32::from(seed);
-    /// let mt2 = Mt19937GenRand32::new(5489_u32);
+    /// let mt1 = Mt::from(seed);
+    /// let mt2 = Mt::new(5489_u32);
     /// assert_eq!(mt1, mt2);
     /// ```
     #[inline]
@@ -107,7 +101,7 @@ impl From<[u8; 4]> for Mt19937GenRand32 {
     }
 }
 
-impl From<u32> for Mt19937GenRand32 {
+impl From<u32> for Mt {
     /// Construct a Mersenne Twister RNG from a `u32` seed.
     ///
     /// This function is equivalent to [`new`].
@@ -115,17 +109,17 @@ impl From<u32> for Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// // Default MT seed
     /// let seed = 5489_u32;
-    /// let mt1 = Mt19937GenRand32::from(seed);
-    /// let mt2 = Mt19937GenRand32::new(seed);
+    /// let mt1 = Mt::from(seed);
+    /// let mt2 = Mt::new(seed);
     /// assert_eq!(mt1, mt2);
     ///
     /// // Non-default MT seed
     /// let seed = 9927_u32;
-    /// let mt1 = Mt19937GenRand32::from(seed);
-    /// let mt2 = Mt19937GenRand32::new(seed);
+    /// let mt1 = Mt::from(seed);
+    /// let mt2 = Mt::new(seed);
     /// assert_eq!(mt1, mt2);
     /// ```
     ///
@@ -136,7 +130,7 @@ impl From<u32> for Mt19937GenRand32 {
     }
 }
 
-impl From<[u32; N]> for Mt19937GenRand32 {
+impl From<[u32; N]> for Mt {
     /// Recover the internal state of a Mersenne Twister using the past 624
     /// samples.
     ///
@@ -156,17 +150,16 @@ impl From<[u32; N]> for Mt19937GenRand32 {
     }
 }
 
-impl TryFrom<&[u32]> for Mt19937GenRand32 {
+impl TryFrom<&[u32]> for Mt {
     type Error = RecoverRngError;
 
     /// Attempt to recover the internal state of a Mersenne Twister using the
     /// past 624 samples.
     ///
-    /// This conversion takes a history of samples from a RNG and returns a
-    /// RNG that will produce identical output to the RNG that supplied the
-    /// samples.
+    /// This conversion takes a history of samples from a RNG and returns a RNG
+    /// that will produce identical output to the RNG that supplied the samples.
     ///
-    /// This conversion is implemented with [`Mt19937GenRand32::recover`].
+    /// This conversion is implemented with [`Mt::recover`].
     ///
     /// # Errors
     ///
@@ -182,8 +175,8 @@ impl TryFrom<&[u32]> for Mt19937GenRand32 {
     }
 }
 
-impl Mt19937GenRand32 {
-    /// Default seed used by [`Mt19937GenRand32::new_unseeded`].
+impl Mt {
+    /// Default seed used by [`Mt::new_unseeded`].
     pub const DEFAULT_SEED: u32 = 5489_u32;
 
     /// Create a new Mersenne Twister random number generator using the given
@@ -194,19 +187,19 @@ impl Mt19937GenRand32 {
     /// ## Constructing with a `u32` seed
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// let seed = 123_456_789_u32;
-    /// let mt1 = Mt19937GenRand32::new(seed);
-    /// let mt2 = Mt19937GenRand32::from(seed.to_le_bytes());
+    /// let mt1 = Mt::new(seed);
+    /// let mt2 = Mt::from(seed.to_le_bytes());
     /// assert_eq!(mt1, mt2);
     /// ```
     ///
     /// ## Constructing with default seed
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mt1 = Mt19937GenRand32::new(Mt19937GenRand32::DEFAULT_SEED);
-    /// let mt2 = Mt19937GenRand32::new_unseeded();
+    /// # use rand_mt::Mt;
+    /// let mt1 = Mt::new(Mt::DEFAULT_SEED);
+    /// let mt2 = Mt::new_unseeded();
     /// assert_eq!(mt1, mt2);
     /// ```
     #[inline]
@@ -245,11 +238,11 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// // Default MT seed
     /// let seed = 5489_u32;
-    /// let mt = Mt19937GenRand32::new(seed);
-    /// let unseeded = Mt19937GenRand32::new_unseeded();
+    /// let mt = Mt::new(seed);
+    /// let unseeded = Mt::new_unseeded();
     /// assert_eq!(mt, unseeded);
     /// ```
     #[inline]
@@ -266,8 +259,8 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// # use rand_mt::Mt;
+    /// let mut mt = Mt::new_unseeded();
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
@@ -285,8 +278,8 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// # use rand_mt::Mt;
+    /// let mut mt = Mt::new_unseeded();
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
     #[inline]
@@ -313,8 +306,8 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// # use rand_mt::Mt;
+    /// let mut mt = Mt::new_unseeded();
     /// let mut buf = [0; 32];
     /// mt.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);
@@ -391,9 +384,9 @@ impl Mt19937GenRand32 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_mt::Mt19937GenRand32;
+    /// # use rand_mt::Mt;
     /// // Default MT seed
-    /// let mut mt = Mt19937GenRand32::new_unseeded();
+    /// let mut mt = Mt::new_unseeded();
     /// let first = mt.next_u32();
     /// mt.fill_bytes(&mut [0; 512]);
     /// // Default MT seed
@@ -401,7 +394,10 @@ impl Mt19937GenRand32 {
     /// assert_eq!(first, mt.next_u32());
     /// ```
     #[inline]
-    #[allow(clippy::cast_possible_truncation)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        reason = "const N is always less than u32::MAX"
+    )]
     pub fn reseed(&mut self, seed: u32) {
         self.idx = N;
         self.state[0] = Wrapping(seed);
@@ -481,7 +477,7 @@ fn untemper(mut x: u32) -> u32 {
 }
 
 #[inline]
-fn fill_next_state(rng: &mut Mt19937GenRand32) {
+fn fill_next_state(rng: &mut Mt) {
     for i in 0..N - M {
         let x = (rng.state[i] & UPPER_MASK) | (rng.state[i + 1] & LOWER_MASK);
         rng.state[i] = rng.state[i + M] ^ (x >> 1) ^ ((x & ONE) * MATRIX_A);
@@ -501,14 +497,14 @@ mod tests {
     use core::iter;
     use core::num::Wrapping;
 
-    use super::{Mt19937GenRand32, N};
+    use super::{Mt, N};
     use crate::vectors::mt::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U32, TEST_OUTPUT};
     use crate::RecoverRngError;
 
     #[test]
     fn seeded_state_from_u32_seed() {
-        let mt = Mt19937GenRand32::new(0x1234_5678_u32);
-        let mt_from_seed = Mt19937GenRand32::from(0x1234_5678_u32.to_le_bytes());
+        let mt = Mt::new(0x1234_5678_u32);
+        let mt_from_seed = Mt::from(0x1234_5678_u32.to_le_bytes());
         assert_eq!(mt.state, mt_from_seed.state);
         for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_U32.iter()) {
             assert_eq!(x, y);
@@ -521,7 +517,7 @@ mod tests {
     #[test]
     fn seeded_state_from_u32_slice_key() {
         let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
-        let mt = Mt19937GenRand32::new_with_key(key.iter().copied());
+        let mt = Mt::new_with_key(key.iter().copied());
         for (&Wrapping(x), &y) in mt.state.iter().zip(STATE_SEEDED_BY_SLICE.iter()) {
             assert_eq!(x, y);
         }
@@ -529,13 +525,13 @@ mod tests {
 
     #[test]
     fn seed_with_empty_iter_returns() {
-        let _rng = Mt19937GenRand32::new_with_key(iter::empty());
+        let _rng = Mt::new_with_key(iter::empty());
     }
 
     #[test]
     fn output_from_u32_slice_key() {
         let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
-        let mut mt = Mt19937GenRand32::new_with_key(key.iter().copied());
+        let mut mt = Mt::new_with_key(key.iter().copied());
         for &x in &TEST_OUTPUT {
             assert_eq!(x, mt.next_u32());
         }
@@ -543,36 +539,26 @@ mod tests {
 
     #[test]
     fn temper_untemper_is_identity() {
-        let mut buf = [0; 4];
         for _ in 0..10_000 {
-            getrandom::getrandom(&mut buf).unwrap();
-            let x = u32::from_le_bytes(buf);
-            assert_eq!(x, super::untemper(super::temper(x)));
-            let x = u32::from_be_bytes(buf);
+            let x = getrandom::u32().unwrap();
             assert_eq!(x, super::untemper(super::temper(x)));
         }
     }
 
     #[test]
     fn untemper_temper_is_identity() {
-        let mut buf = [0; 4];
         for _ in 0..10_000 {
-            getrandom::getrandom(&mut buf).unwrap();
-            let x = u32::from_le_bytes(buf);
-            assert_eq!(x, super::temper(super::untemper(x)));
-            let x = u32::from_be_bytes(buf);
+            let x = getrandom::u32().unwrap();
             assert_eq!(x, super::temper(super::untemper(x)));
         }
     }
 
     #[test]
     fn recovery_via_from() {
-        let mut buf = [0; 4];
         for _ in 0..100 {
-            getrandom::getrandom(&mut buf).unwrap();
-            let seed = u32::from_le_bytes(buf);
+            let seed = getrandom::u32().unwrap();
             for skip in 0..256 {
-                let mut orig_mt = Mt19937GenRand32::new(seed);
+                let mut orig_mt = Mt::new(seed);
                 // skip some samples so the RNG is in an intermediate state
                 for _ in 0..skip {
                     orig_mt.next_u32();
@@ -581,7 +567,7 @@ mod tests {
                 for sample in &mut samples {
                     *sample = orig_mt.next_u32();
                 }
-                let mut recovered_mt = Mt19937GenRand32::from(samples);
+                let mut recovered_mt = Mt::from(samples);
                 for _ in 0..624 * 2 {
                     assert_eq!(orig_mt.next_u32(), recovered_mt.next_u32());
                 }
@@ -591,12 +577,10 @@ mod tests {
 
     #[test]
     fn recovery_via_recover() {
-        let mut buf = [0; 4];
         for _ in 0..100 {
-            getrandom::getrandom(&mut buf).unwrap();
-            let seed = u32::from_le_bytes(buf);
+            let seed = getrandom::u32().unwrap();
             for skip in 0..256 {
-                let mut orig_mt = Mt19937GenRand32::new(seed);
+                let mut orig_mt = Mt::new(seed);
                 // skip some samples so the RNG is in an intermediate state
                 for _ in 0..skip {
                     orig_mt.next_u32();
@@ -605,7 +589,7 @@ mod tests {
                 for sample in &mut samples {
                     *sample = orig_mt.next_u32();
                 }
-                let mut recovered_mt = Mt19937GenRand32::recover(samples.iter().copied()).unwrap();
+                let mut recovered_mt = Mt::recover(samples.iter().copied()).unwrap();
                 for _ in 0..624 * 2 {
                     assert_eq!(orig_mt.next_u32(), recovered_mt.next_u32());
                 }
@@ -616,24 +600,24 @@ mod tests {
     #[test]
     fn recover_required_exact_sample_length_via_from() {
         assert_eq!(
-            Mt19937GenRand32::try_from(&[0; 0][..]),
+            Mt::try_from(&[0; 0][..]),
             Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::try_from(&[0; 1][..]),
+            Mt::try_from(&[0; 1][..]),
             Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::try_from(&[0; 623][..]),
+            Mt::try_from(&[0; 623][..]),
             Err(RecoverRngError::TooFewSamples(N))
         );
-        Mt19937GenRand32::try_from(&[0; 624][..]).unwrap();
+        Mt::try_from(&[0; 624][..]).unwrap();
         assert_eq!(
-            Mt19937GenRand32::try_from(&[0; 625][..]),
+            Mt::try_from(&[0; 625][..]),
             Err(RecoverRngError::TooManySamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::try_from(&[0; 1000][..]),
+            Mt::try_from(&[0; 1000][..]),
             Err(RecoverRngError::TooManySamples(N))
         );
     }
@@ -641,53 +625,52 @@ mod tests {
     #[test]
     fn recover_required_exact_sample_length_via_recover() {
         assert_eq!(
-            Mt19937GenRand32::recover([0; 0].iter().copied()),
+            Mt::recover([0; 0].iter().copied()),
             Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::recover([0; 1].iter().copied()),
+            Mt::recover([0; 1].iter().copied()),
             Err(RecoverRngError::TooFewSamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::recover([0; 623].iter().copied()),
+            Mt::recover([0; 623].iter().copied()),
             Err(RecoverRngError::TooFewSamples(N))
         );
-        Mt19937GenRand32::recover([0; 624].iter().copied()).unwrap();
+        Mt::recover([0; 624].iter().copied()).unwrap();
         assert_eq!(
-            Mt19937GenRand32::recover([0; 625].iter().copied()),
+            Mt::recover([0; 625].iter().copied()),
             Err(RecoverRngError::TooManySamples(N))
         );
         assert_eq!(
-            Mt19937GenRand32::recover([0; 1000].iter().copied()),
+            Mt::recover([0; 1000].iter().copied()),
             Err(RecoverRngError::TooManySamples(N))
         );
     }
 
     #[test]
-    #[cfg(feature = "std")]
     fn fmt_debug_does_not_leak_seed() {
         use core::fmt::Write as _;
         use std::string::String;
 
-        let random = Mt19937GenRand32::new(874);
+        let random = Mt::new(874);
 
         let mut buf = String::new();
-        write!(&mut buf, "{:?}", random).unwrap();
+        write!(&mut buf, "{random:?}").unwrap();
         assert!(!buf.contains("874"));
-        assert_eq!(buf, "Mt19937GenRand32 {}");
+        assert_eq!(buf, "Mt {}");
 
-        let random = Mt19937GenRand32::new(123_456);
+        let random = Mt::new(123_456);
 
         let mut buf = String::new();
-        write!(&mut buf, "{:?}", random).unwrap();
+        write!(&mut buf, "{random:?}").unwrap();
         assert!(!buf.contains("123456"));
-        assert_eq!(buf, "Mt19937GenRand32 {}");
+        assert_eq!(buf, "Mt {}");
     }
 
     #[test]
     fn default_is_new_unseeded() {
-        let mut default = Mt19937GenRand32::default();
-        let mut unseeded = Mt19937GenRand32::new_unseeded();
+        let mut default = Mt::default();
+        let mut unseeded = Mt::new_unseeded();
 
         assert_eq!(default, unseeded);
         for _ in 0..1024 {

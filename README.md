@@ -18,8 +18,14 @@ The Mersenne Twister algorithms are not suitable for cryptographic uses, but are
 ubiquitous. See the [Mersenne Twister website]. A variant of Mersenne Twister is
 the [default PRNG in Ruby].
 
+[mersenne twister website]:
+  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+[default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
+
 This crate optionally depends on [`rand_core`] and implements `RngCore` on the
 RNGs in this crate.
+
+[`rand_core`]: https://crates.io/crates/rand_core
 
 ## Usage
 
@@ -27,7 +33,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "4.2.2"
+rand_mt = "5.0.0"
 ```
 
 Then create a RNG like:
@@ -46,8 +52,6 @@ are enabled by default:
 
 - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
   feature implements `RngCore` and `SeedableRng` on the RNGs in this crate.
-- **std** - Enables a dependency on the Rust Standard Library. Activating this
-  feature enables [`std::error::Error`] impls on error types in this crate.
 
 Mersenne Twister requires approximately 2.5 kilobytes of internal state. To make
 the RNGs implemented in this crate practical to embed in other structs, you may
@@ -55,7 +59,7 @@ wish to store the RNG in a `Box`.
 
 ### Minimum Supported Rust Version
 
-This crate requires at least Rust 1.47.0. This version can be bumped in minor
+This crate requires at least Rust 1.81.0. This version can be bumped in minor
 releases.
 
 ## License
@@ -67,10 +71,4 @@ releases.
 `rand_mt` is derived from `rust-mersenne-twister` @ [`1.1.1`] which is Copyright
 (c) 2015 rust-mersenne-twister developers.
 
-[mersenne twister website]:
-  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
-[default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
-[`rand_core`]: https://crates.io/crates/rand_core
-[`rand_core`]: https://crates.io/crates/rand_core
-[`std::error::error`]: https://doc.rust-lang.org/std/error/trait.Error.html
 [`1.1.1`]: https://github.com/dcrewi/rust-mersenne-twister/tree/1.1.1

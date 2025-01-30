@@ -34,17 +34,16 @@
 //!
 //! This crate provides:
 //!
-//! - [`Mt19937GenRand32`], the original reference Mersenne Twister
-//!   implementation known as `MT19937`. This is a good choice on both 32-bit
-//!   and 64-bit CPUs (for 32-bit output).
-//! - [`Mt19937GenRand64`], the 64-bit variant of `MT19937` known as
-//!   `MT19937-64`. This algorithm produces a different output stream than
-//!   `MT19937` and produces 64-bit output. This is a good choice on 64-bit
-//!   CPUs.
+//! - [`Mt`], the original reference Mersenne Twister implementation known as
+//!   `MT19937`. This is a good choice on both 32-bit and 64-bit CPUs (for
+//!   32-bit output).
+//! - [`Mt64`], the 64-bit variant of `MT19937` known as `MT19937-64`. This
+//!   algorithm produces a different output stream than `MT19937` and produces
+//!   64-bit output. This is a good choice on 64-bit CPUs.
 //!
-//! Both of these RNGs use approximately 2.5 kilobytes of state.
-//! [`Mt19937GenRand32`] uses a 32-bit seed. [`Mt19937GenRand64`] uses a 64-bit
-//! seed. Both can be seeded from an iterator of seeds.
+//! Both of these RNGs use approximately 2.5 kilobytes of state. [`Mt`] uses a
+//! 32-bit seed. [`Mt64`] uses a 64-bit seed. Both can be seeded from an
+//! iterator of seeds.
 //!
 //! Both RNGs implement a `recover` constructor which can reconstruct the RNG
 //! state from a sequence of output samples.
@@ -79,54 +78,34 @@
 //!
 //! - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
 //!   feature implements `RngCore` and `SeedableRng` on the RNGs in this crate.
-//! - **std** - Enables a dependency on the Rust Standard Library. Activating
-//!   this feature enables [`std::error::Error`] impls on error types in this
-//!   crate.
 //!
 //! Mersenne Twister requires approximately 2.5 kilobytes of internal state. To
 //! make the RNGs implemented in this crate practical to embed in other structs,
 //! you may wish to store the RNG in a [`Box`].
 //!
 #![cfg_attr(
-    not(feature = "std"),
-    doc = "[`std::error::Error`]: https://doc.rust-lang.org/std/error/trait.Error.html"
-)]
-#![cfg_attr(feature = "std", doc = "[`Box`]: std::boxed::Box")]
-#![cfg_attr(
-    not(feature = "std"),
-    doc = "[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
-)]
-#![cfg_attr(
-    not(feature = "rand_core"),
+    not(feature = "rand-traits"),
     doc = "[`rand_core`]: https://crates.io/crates/rand_core"
 )]
-//!
+//! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/4.2.2")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/5.0.0")]
 #![no_std]
 
-#[cfg(feature = "std")]
+#[cfg(any(test, doctest))]
 extern crate std;
 
 use core::fmt;
 
-pub use crate::mt::Mt19937GenRand32;
-pub use crate::mt64::Mt19937GenRand64;
+pub use crate::mt::Mt;
+pub use crate::mt64::Mt64;
 
 mod mt;
 mod mt64;
 #[cfg(test)]
 mod vectors;
 
-/// A type alias for [`Mt19937GenRand32`], 32-bit Mersenne Twister.
-pub type Mt = Mt19937GenRand32;
-
-/// A type alias for [`Mt19937GenRand64`], 64-bit Mersenne Twister.
-pub type Mt64 = Mt19937GenRand64;
-
 /// Error returned from fallible Mersenne Twister recovery constructors.
-///
-/// When the `std` feature is enabled, this type implements `std::error::Error`.
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum RecoverRngError {
@@ -151,27 +130,22 @@ impl fmt::Display for RecoverRngError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::TooFewSamples(expected) => {
-                write!(f, "Too few samples given to recover: expected {}", expected)
+                write!(f, "Too few samples given to recover: expected {expected}")
             }
-            Self::TooManySamples(expected) => write!(
-                f,
-                "Too many samples given to recover: expected {}",
-                expected
-            ),
+            Self::TooManySamples(expected) => {
+                write!(f, "Too many samples given to recover: expected {expected}")
+            }
         }
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for RecoverRngError {}
+impl core::error::Error for RecoverRngError {}
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "std")]
     use super::RecoverRngError;
 
     #[test]
-    #[cfg(feature = "std")]
     fn error_display_is_not_empty() {
         use core::fmt::Write as _;
         use std::string::String;
@@ -184,7 +158,7 @@ mod tests {
         ];
         for tc in test_cases {
             let mut buf = String::new();
-            write!(&mut buf, "{}", tc).unwrap();
+            write!(&mut buf, "{tc}").unwrap();
             assert!(!buf.is_empty());
         }
     }
