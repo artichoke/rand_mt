@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install nightly Rust toolchain
         uses: artichoke/setup-rust/code-coverage@v1.12.1
@@ -61,7 +63,7 @@ jobs:
         run: grcov rand_mt*.profraw --source-dir . --keep-only 'src/**/*.rs' --binary-path target/debug -t covdir --filter covered -o target/coverage/coverage.json
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        uses: aws-actions/configure-aws-credentials@4fc4975a852c8cd99761e2de1f4ba73402e44dd9 # v4.0.3
         if: github.ref == 'refs/heads/trunk'
         with:
           aws-region: us-west-2
@@ -82,8 +84,13 @@ jobs:
 
       - name: Check missed lines
         shell: python
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_NUMBER: ${{ github.event.number }}
         run: |
           import json
+          import os
           from urllib.request import urlopen
 
           trunk_coverage_url = "https://codecov.artichokeruby.org/rand_mt/coverage.json"
@@ -101,7 +108,7 @@ jobs:
               print("")
 
 
-          if "${{ github.ref_name }}" == "trunk":
+          if os.environ.get("GITHUB_REF_NAME") == "trunk":
               # We don't need to compare trunk coverage to itself
               exit(0)
 
@@ -114,8 +121,8 @@ jobs:
               branch_coverage = json.load(local)
 
           on = None
-          if "${{ github.event_name }}" == "pull_request":
-              on = "PR artichoke/rand_mt#${{ github.event.number }}"
+          if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+              on = "PR artichoke/rand_mt#" + os.environ.get("GITHUB_EVENT_NUMBER")
 
           print_report(branch_coverage, on=on)
 
