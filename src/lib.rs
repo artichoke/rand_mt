@@ -77,7 +77,7 @@
 //! that are enabled by default:
 //!
 //! - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
-//!   feature implements `RngCore` and `SeedableRng` on the RNGs in this crate.
+//!   feature implements `Rng` and `SeedableRng` on the RNGs in this crate.
 //!
 //! Mersenne Twister requires approximately 2.5 kilobytes of internal state. To
 //! make the RNGs implemented in this crate practical to embed in other structs,

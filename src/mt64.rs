@@ -478,8 +478,8 @@ mod tests {
     use core::num::Wrapping;
 
     use super::{Mt64, NN};
-    use crate::vectors::mt64::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U64, TEST_OUTPUT};
     use crate::RecoverRngError;
+    use crate::vectors::mt64::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U64, TEST_OUTPUT};
 
     #[test]
     fn seeded_state_from_u64_seed() {

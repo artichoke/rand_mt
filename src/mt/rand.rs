@@ -9,7 +9,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use rand_core::{RngCore, SeedableRng};
+use rand_core::{Infallible, SeedableRng, TryRng};
 
 use super::Mt;
 
@@ -21,13 +21,13 @@ impl SeedableRng for Mt {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::{RngCore, SeedableRng};
+    /// use rand_core::{Rng, SeedableRng};
     /// use rand_mt::Mt;
     ///
     /// // Default MT seed
     /// let seed = 5489_u32.to_le_bytes();
     /// let mut rng = Mt::from_seed(seed);
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u32(), rng.next_u32());
     /// # }
     /// # example(rng);
@@ -38,7 +38,9 @@ impl SeedableRng for Mt {
     }
 }
 
-impl RngCore for Mt {
+impl TryRng for Mt {
+    type Error = Infallible;
+
     /// Generate next `u64` output.
     ///
     /// This function is implemented by generating two `u32`s from the RNG and
@@ -47,18 +49,18 @@ impl RngCore for Mt {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
     /// let mut rng = Mt::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u64(), rng.next_u64());
     /// # }
     /// # example(rng);
     /// ```
     #[inline]
-    fn next_u64(&mut self) -> u64 {
-        Self::next_u64(self)
+    fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+        Ok(Self::next_u64(self))
     }
 
     /// Generate next `u32` output.
@@ -69,18 +71,18 @@ impl RngCore for Mt {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
     /// let mut rng = Mt::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u32(), rng.next_u32());
     /// # }
     /// # example(rng);
     /// ```
     #[inline]
-    fn next_u32(&mut self) -> u32 {
-        Self::next_u32(self)
+    fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+        Ok(Self::next_u32(self))
     }
 
     /// Fill a buffer with bytes generated from the RNG.
@@ -94,11 +96,11 @@ impl RngCore for Mt {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
     /// let mut rng = Mt::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// let mut buf = [0; 32];
     /// rng.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);
@@ -109,15 +111,16 @@ impl RngCore for Mt {
     /// # example(rng);
     /// ```
     #[inline]
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Self::Error> {
         Self::fill_bytes(self, dest);
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use core::num::Wrapping;
-    use rand_core::{RngCore, SeedableRng};
+    use rand_core::{Rng, SeedableRng};
 
     use super::Mt;
     use crate::vectors::mt::{STATE_SEEDED_BY_U32, TEST_OUTPUT};
@@ -140,7 +143,7 @@ mod tests {
         let key = [0x123_u32, 0x234_u32, 0x345_u32, 0x456_u32];
         let mut rng = Mt::new_with_key(key.iter().copied());
         for &x in &TEST_OUTPUT {
-            assert_eq!(x, RngCore::next_u32(&mut rng));
+            assert_eq!(x, Rng::next_u32(&mut rng));
         }
     }
 }

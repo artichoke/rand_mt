@@ -9,7 +9,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use rand_core::{RngCore, SeedableRng};
+use rand_core::{Infallible, SeedableRng, TryRng};
 
 use super::Mt64;
 
@@ -21,7 +21,7 @@ impl SeedableRng for Mt64 {
     /// # Examples
     ///
     /// ```
-    /// # use rand_core::{RngCore, SeedableRng};
+    /// # use rand_core::{Rng, SeedableRng};
     /// # use rand_mt::Mt64;
     /// // Default MT seed
     /// let seed = 5489_u64.to_le_bytes();
@@ -34,7 +34,9 @@ impl SeedableRng for Mt64 {
     }
 }
 
-impl RngCore for Mt64 {
+impl TryRng for Mt64 {
+    type Error = Infallible;
+
     /// Generate next `u64` output.
     ///
     /// `u64` is the native output of the generator. This function advances the
@@ -43,18 +45,18 @@ impl RngCore for Mt64 {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt64;
     ///
     /// let mut rng = Mt64::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u64(), rng.next_u64());
     /// # }
     /// # example(rng);
     /// ```
     #[inline]
-    fn next_u64(&mut self) -> u64 {
-        Self::next_u64(self)
+    fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+        Ok(Self::next_u64(self))
     }
 
     /// Generate next `u32` output.
@@ -65,18 +67,18 @@ impl RngCore for Mt64 {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt64;
     ///
     /// let mut rng = Mt64::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u32(), rng.next_u32());
     /// # }
     /// # example(rng);
     /// ```
     #[inline]
-    fn next_u32(&mut self) -> u32 {
-        Self::next_u32(self)
+    fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+        Ok(Self::next_u32(self))
     }
 
     /// Fill a buffer with bytes generated from the RNG.
@@ -90,11 +92,11 @@ impl RngCore for Mt64 {
     /// # Examples
     ///
     /// ```
-    /// use rand_core::RngCore;
+    /// use rand_core::Rng;
     /// use rand_mt::Mt64;
     ///
     /// let mut rng = Mt64::new_unseeded();
-    /// # fn example<T: RngCore>(mut rng: T) {
+    /// # fn example<T: Rng>(mut rng: T) {
     /// let mut buf = [0; 32];
     /// rng.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);
@@ -105,15 +107,16 @@ impl RngCore for Mt64 {
     /// # example(rng);
     /// ```
     #[inline]
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Self::Error> {
         Self::fill_bytes(self, dest);
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use core::num::Wrapping;
-    use rand_core::{RngCore, SeedableRng};
+    use rand_core::{Rng, SeedableRng};
 
     use super::Mt64;
     use crate::vectors::mt64::{STATE_SEEDED_BY_U64, TEST_OUTPUT};
@@ -136,7 +139,7 @@ mod tests {
         let key = [0x12345_u64, 0x23456_u64, 0x34567_u64, 0x45678_u64];
         let mut mt = Mt64::new_with_key(key.iter().copied());
         for &x in &TEST_OUTPUT {
-            assert_eq!(x, RngCore::next_u64(&mut mt));
+            assert_eq!(x, Rng::next_u64(&mut mt));
         }
     }
 }
