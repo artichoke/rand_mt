@@ -21,8 +21,8 @@ the [default PRNG in Ruby].
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 [default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
 
-This crate optionally depends on [`rand_core`] and implements `Rng` on the
-RNGs in this crate.
+This crate optionally depends on [`rand_core`] and implements `Rng` on the RNGs
+in this crate.
 
 [`rand_core`]: https://crates.io/crates/rand_core
 
