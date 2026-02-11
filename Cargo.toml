@@ -6,8 +6,8 @@ authors = [
     "Ryan Lopopolo <rjl@hyperbo.la>",
 ]
 license = "MIT OR Apache-2.0"
-edition = "2021"
-rust-version = "1.81.0"
+edition = "2024"
+rust-version = "1.85.0"
 readme = "README.md"
 repository = "https://github.com/artichoke/rand_mt"
 documentation = "https://docs.rs/rand_mt"
@@ -22,7 +22,7 @@ default = ["rand-traits"]
 rand-traits = ["dep:rand_core"]
 
 [dependencies]
-rand_core = { version = "0.9.0", default-features = false, optional = true }
+rand_core = { version = "0.10.0", default-features = false, optional = true }
 
 [dev-dependencies]
 getrandom = { version = "0.3.1", default-features = false }

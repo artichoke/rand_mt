@@ -21,8 +21,8 @@ the [default PRNG in Ruby].
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 [default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
 
-This crate optionally depends on [`rand_core`] and implements `RngCore` on the
-RNGs in this crate.
+This crate optionally depends on [`rand_core`] and implements `Rng` on the RNGs
+in this crate.
 
 [`rand_core`]: https://crates.io/crates/rand_core
 
@@ -50,7 +50,7 @@ assert_ne!(rng.next_u64(), rng.next_u64());
 are enabled by default:
 
 - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
-  feature implements `RngCore` and `SeedableRng` on the RNGs in this crate.
+  feature implements `Rng` and `SeedableRng` on the RNGs in this crate.
 
 Mersenne Twister requires approximately 2.5 kilobytes of internal state. To make
 the RNGs implemented in this crate practical to embed in other structs, you may
@@ -58,7 +58,7 @@ wish to store the RNG in a `Box`.
 
 ### Minimum Supported Rust Version
 
-This crate requires at least Rust 1.81.0. This version can be bumped in minor
+This crate requires at least Rust 1.85.0. This version can be bumped in minor
 releases.
 
 ## License

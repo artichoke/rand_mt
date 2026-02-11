@@ -498,8 +498,8 @@ mod tests {
     use core::num::Wrapping;
 
     use super::{Mt, N};
-    use crate::vectors::mt::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U32, TEST_OUTPUT};
     use crate::RecoverRngError;
+    use crate::vectors::mt::{STATE_SEEDED_BY_SLICE, STATE_SEEDED_BY_U32, TEST_OUTPUT};
 
     #[test]
     fn seeded_state_from_u32_seed() {
