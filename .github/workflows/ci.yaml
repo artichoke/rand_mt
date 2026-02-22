@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: artichoke/setup-rust/build-and-test@68e0ebb3b406970de1cc2ca807797c9156a198a7 # v2.0.1
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
         with:
           toolchain: stable
 
@@ -64,7 +64,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: artichoke/setup-rust/build-and-test@68e0ebb3b406970de1cc2ca807797c9156a198a7 # v2.0.1
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
         with:
           toolchain: "1.85.0"
 
@@ -96,9 +96,10 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: artichoke/setup-rust/lint-and-format@68e0ebb3b406970de1cc2ca807797c9156a198a7 # v2.0.1
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
         with:
           toolchain: stable
+          components: rustfmt, clippy
 
       - name: Check formatting
         run: cargo fmt --check
