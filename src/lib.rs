@@ -25,7 +25,6 @@
 //
 // This approach is borrowed from tokio.
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![cfg_attr(docsrs, feature(doc_alias))]
 
 //! Mersenne Twister random number generators.
 //!
@@ -89,7 +88,7 @@
 )]
 //! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.1")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.2")]
 #![no_std]
 
 #[cfg(any(test, doctest))]
