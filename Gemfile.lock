@@ -49,5 +49,8 @@ DEPENDENCIES
   rubocop (~> 1.84)
   rubocop-rake (~> 0.7)
 
+RUBY VERSION
+  ruby 4.0.2
+
 BUNDLED WITH
-   2.6.9
+  4.0.8
