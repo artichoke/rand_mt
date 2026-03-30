@@ -1,0 +1,17 @@
+[project]
+name = "rand_mt"
+version = "6.0.2"
+description = "Reference Mersenne Twister random number generators"
+readme = "README.md"
+requires-python = ">=3.14"
+classifiers = ["Private :: Do Not Upload"]
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "yamllint==1.38.0",
+]
+
+[tool.uv]
+package = false
+exclude-newer = "7 days"

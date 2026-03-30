@@ -26,6 +26,11 @@ issues are labeled `E-easy`].
 rand_mt includes Rust and Text sources. Developing on rand_mt requires
 configuring several dependencies.
 
+rand_mt uses [mise] to manage the local development toolchain declared in
+[`mise.toml`](mise.toml), including Node.js, Python, Ruby, Rust, and `uv`. For
+Rust, `mise` uses [rustup] under the hood. Nightly-only Rust workflows in this
+repository continue to use `rustup` directly.
+
 ### Rust Toolchain
 
 rand_mt depends on Rust and several compiler plugins for linting and formatting.
@@ -34,22 +39,20 @@ compiler.
 
 #### Installation
 
-The recommended way to install the Rust toolchain is with [rustup]. On macOS,
-you can install rustup with [Homebrew]:
+Install and activate [mise], then install the toolchains declared in
+[`mise.toml`](mise.toml):
 
 ```sh
-brew install rustup-init
-rustup-init
+mise install
 ```
 
-Once you have rustup, you can install the Rust toolchain needed to compile
-rand_mt:
+`mise.toml` configures the latest stable Rust toolchain with the `minimal`
+profile plus the `clippy` and `rustfmt` components. `mise` installs that
+toolchain via [rustup].
 
-```sh
-rustup toolchain install stable
-rustup component add rustfmt
-rustup component add clippy
-```
+Some repository tasks still require nightly Rust. For example,
+[`Rakefile`](Rakefile) runs `cargo doc` with `rustup run --install nightly`,
+which will install nightly on demand if needed.
 
 To update your stable Rust compiler to the latest version, run:
 
@@ -69,32 +72,16 @@ cargo build
 
 ### Ruby
 
-rand_mt requires a recent Ruby 4.0 and [bundler] for development tasks. The
-[`.ruby-version`](.ruby-version) file in this repository specifies the preferred
-Ruby toolchain.
-
-If you use [mise], you can install Ruby dependencies by running:
+rand_mt requires a recent Ruby 4.0 and [bundler] for development tasks. Install
+the development toolchain with [mise]:
 
 ```sh
-mise install ruby@"$(cat .ruby-version)"
+mise install
 gem install bundler
 ```
 
-If you use [RVM], you can install Ruby dependencies by running:
-
-```sh
-rvm install "$(cat .ruby-version)"
-gem install bundler
-```
-
-If you use [rbenv] and [ruby-build], you can install Ruby dependencies by
-running:
-
-```sh
-rbenv install "$(cat .ruby-version)"
-gem install bundler
-rbenv rehash
-```
+The pinned versions for Node.js, Python, Ruby, Rust, and `uv` live in
+[`mise.toml`](mise.toml).
 
 The [`Gemfile`](Gemfile) in this repository specifies several dev dependencies.
 You can install these dependencies by running:
@@ -103,9 +90,6 @@ You can install these dependencies by running:
 bundle install
 ```
 
-[rvm]: https://rvm.io/
-[rbenv]: https://github.com/rbenv/rbenv
-[ruby-build]: https://github.com/rbenv/ruby-build
 [mise]: https://mise.jdx.dev/
 
 rand_mt uses [`rake`](Rakefile) as a task runner. You can see the available
@@ -152,11 +136,21 @@ Node.js is only required for formatting if modifying the following filetypes:
 - `yaml`
 - `yml`
 
-You will need to install [Node.js]. On macOS, you can install Node.js with
-[Homebrew]:
+Install Node.js with `mise`:
 
 ```sh
-brew install node
+mise install
+```
+
+### Python and uv
+
+Python and `uv` are optional dependencies that are used for linting YAML sources
+with `yamllint`.
+
+Install them with `mise`:
+
+```sh
+mise install
 ```
 
 ## Linting
@@ -171,6 +165,7 @@ To lint and format text sources run:
 
 ```sh
 bundle exec rake fmt:text
+uv run yamllint --strict --format github .
 ```
 
 ## Testing
@@ -218,11 +213,9 @@ Regular dependency bumps are handled by [@dependabot].
 [good first issues are labeled `e-easy`]:
   https://github.com/artichoke/rand_mt/labels/E-easy
 [rustup]: https://rustup.rs/
-[homebrew]: https://docs.brew.sh/Installation
 [bundler]: https://bundler.io/
 [rubocop]: https://github.com/rubocop-hq/rubocop
 [prettier]: https://prettier.io/
-[node.js]: https://nodejs.org/en/download/package-manager/
 [rust book chapter on testing]:
   https://doc.rust-lang.org/book/ch11-00-testing.html
 [cargo-outdated]: https://github.com/kbknapp/cargo-outdated

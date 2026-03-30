@@ -119,7 +119,7 @@ jobs:
       - name: Install Ruby toolchain
         uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
         with:
-          ruby-version: ".ruby-version"
+          ruby-version: "4.0"
           bundler-cache: true
 
       - name: Lint and check formatting with Rubocop
@@ -145,9 +145,11 @@ jobs:
       - name: Format with prettier
         run: npx prettier --check '**/*'
 
-      - name: Lint YAML sources with yamllint
-        run: |
-          yamllint --version
-          echo "Linting YAML sources with yamllint ..."
-          yamllint --strict --format github .
-          echo "OK"
+      - name: Install uv
+        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Run yamllint
+        run: uv run yamllint --strict --format github .
