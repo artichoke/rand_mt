@@ -32,17 +32,21 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "6.0.2"
+rand_mt = "6.0.3"
 ```
 
-Then create a RNG like:
+Then create a RNG with an explicit seed:
 
 ```rust
 use rand_mt::Mt64;
 
-let mut rng = Mt64::new_unseeded();
+let mut rng = Mt64::new(0x0123_4567_89ab_cdef_u64);
 assert_ne!(rng.next_u64(), rng.next_u64());
 ```
+
+`Mt::new_unseeded()` and `Mt64::new_unseeded()` are deterministic shortcuts for
+the reference seed. They are intended for reproducible streams and tests and do
+not gather entropy.
 
 ## Crate Features
 

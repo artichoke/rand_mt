@@ -219,6 +219,9 @@ impl Mt64 {
     /// Create a new Mersenne Twister random number generator using the default
     /// fixed seed.
     ///
+    /// This constructor is deterministic and intended for reproducible
+    /// streams, tests, and reference behavior. It does not gather entropy.
+    ///
     /// # Examples
     ///
     /// ```
@@ -244,7 +247,7 @@ impl Mt64 {
     ///
     /// ```
     /// # use rand_mt::Mt64;
-    /// let mut mt = Mt64::new_unseeded();
+    /// let mut mt = Mt64::new(0x0123_4567_89ab_cdef_u64);
     /// assert_ne!(mt.next_u64(), mt.next_u64());
     /// ```
     #[inline]
@@ -269,7 +272,7 @@ impl Mt64 {
     ///
     /// ```
     /// # use rand_mt::Mt64;
-    /// let mut mt = Mt64::new_unseeded();
+    /// let mut mt = Mt64::new(0x0123_4567_89ab_cdef_u64);
     /// assert_ne!(mt.next_u32(), mt.next_u32());
     /// ```
     #[inline]
@@ -293,7 +296,7 @@ impl Mt64 {
     ///
     /// ```
     /// # use rand_mt::Mt64;
-    /// let mut mt = Mt64::new_unseeded();
+    /// let mut mt = Mt64::new(0x0123_4567_89ab_cdef_u64);
     /// let mut buf = [0; 32];
     /// mt.fill_bytes(&mut buf);
     /// assert_ne!([0; 32], buf);

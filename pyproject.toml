@@ -1,6 +1,6 @@
 [project]
 name = "rand_mt"
-version = "6.0.2"
+version = "6.0.3"
 description = "Reference Mersenne Twister random number generators"
 readme = "README.md"
 requires-python = ">=3.14"
