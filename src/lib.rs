@@ -60,15 +60,17 @@
 //! rng.fill_bytes(&mut buf);
 //! ```
 //!
-//! Or if you want to use the default (fixed) seeds that are specified in the
-//! reference implementations:
+//! Or if you want reproducible output from the default reference seed:
 //!
 //! ```
 //! # use rand_mt::Mt;
-//! let default = Mt::default();
-//! let mt = Mt::new_unseeded();
-//! assert_eq!(default, mt);
+//! let mut mt = Mt::new(Mt::DEFAULT_SEED);
+//! assert_ne!(mt.next_u32(), mt.next_u32());
 //! ```
+//!
+//! [`Mt::new_unseeded`] and [`Mt64::new_unseeded`] are deterministic shortcuts
+//! for the reference seed. They are intended for reproducible streams and
+//! tests and do not gather entropy.
 //!
 //! # Crate Features
 //!
@@ -88,7 +90,7 @@
 )]
 //! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.2")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.3")]
 #![no_std]
 
 #[cfg(any(test, doctest))]

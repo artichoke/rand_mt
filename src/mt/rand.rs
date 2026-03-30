@@ -52,7 +52,7 @@ impl TryRng for Mt {
     /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
-    /// let mut rng = Mt::new_unseeded();
+    /// let mut rng = Mt::new(0x1234_5678_u32);
     /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u64(), rng.next_u64());
     /// # }
@@ -74,7 +74,7 @@ impl TryRng for Mt {
     /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
-    /// let mut rng = Mt::new_unseeded();
+    /// let mut rng = Mt::new(0x1234_5678_u32);
     /// # fn example<T: Rng>(mut rng: T) {
     /// assert_ne!(rng.next_u32(), rng.next_u32());
     /// # }
@@ -99,7 +99,7 @@ impl TryRng for Mt {
     /// use rand_core::Rng;
     /// use rand_mt::Mt;
     ///
-    /// let mut rng = Mt::new_unseeded();
+    /// let mut rng = Mt::new(0x1234_5678_u32);
     /// # fn example<T: Rng>(mut rng: T) {
     /// let mut buf = [0; 32];
     /// rng.fill_bytes(&mut buf);
