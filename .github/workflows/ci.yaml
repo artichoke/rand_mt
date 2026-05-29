@@ -8,7 +8,7 @@ name: CI
     branches:
       - trunk
   schedule:
-    - cron: "0 0 * * TUE"
+    - cron: "0 0 * * WED"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -32,9 +32,14 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
-        with:
-          toolchain: stable
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install stable --no-self-update
+          rustup default stable
+          rustc -Vv
+          cargo -V
 
       - name: Compile
         run: cargo build --verbose
@@ -64,9 +69,14 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
-        with:
-          toolchain: "1.85.0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install 1.85.0 --no-self-update
+          rustup default 1.85.0
+          rustc -Vv
+          cargo -V
 
       - name: Compile
         run: cargo build --verbose
@@ -96,10 +106,14 @@ jobs:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # master
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup set profile minimal
+          rustup toolchain install stable --component rustfmt --component clippy --no-self-update
+          rustup default stable
+          rustc -Vv
+          cargo -V
 
       - name: Check formatting
         run: cargo fmt --check
@@ -107,23 +121,26 @@ jobs:
       - name: Lint with Clippy
         run: cargo clippy --workspace --all-features --all-targets
 
-  ruby:
-    name: Lint and format Ruby
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
+      - name: Install nightly Rust toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install nightly --no-self-update
+          rustc +nightly -Vv
+          cargo +nightly -V
 
-      - name: Install Ruby toolchain
-        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
-        with:
-          ruby-version: "4.0"
-          bundler-cache: true
+      - name: Check docs with no default features
+        env:
+          RUSTDOCFLAGS: -D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs
+        run: cargo +nightly doc --workspace --no-default-features
 
-      - name: Lint and check formatting with Rubocop
-        run: bundle exec rubocop --format github
+      - name: Clean docs
+        run: cargo clean
+
+      - name: Check docs
+        env:
+          RUSTDOCFLAGS: -D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs
+        run: cargo +nightly doc --workspace
 
   text:
     name: Lint and format text
@@ -143,13 +160,4 @@ jobs:
         run: npm ci
 
       - name: Format with prettier
-        run: npx prettier --check '**/*'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
-
-      - name: Set up Python
-        run: uv python install
-
-      - name: Run yamllint
-        run: uv run yamllint --strict --format github .
+        run: npm run fmt:check
