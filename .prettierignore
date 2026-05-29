@@ -4,6 +4,7 @@
 
 node_modules/
 target/
+.venv/
 
 !*.html
 !*.js
@@ -11,6 +12,9 @@ target/
 !*.md
 !*.yaml
 !*.yml
+
+pnpm-lock.yaml
+pnpm-workspace.yaml
 
 mutants.out*/
 **/vendor/*
