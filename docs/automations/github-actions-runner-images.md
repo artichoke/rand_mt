@@ -31,8 +31,8 @@ important coverage is:
 - explicit OS labels where stable, explainable coverage matters;
 - the Windows and macOS image families that will become the next `*-latest`
   defaults;
-- MSRV, lint, docs, Ruby, and text jobs that should avoid surprise OS changes
-  unless the workflow intentionally tracks `*-latest`.
+- MSRV, lint, docs, and text jobs that should avoid surprise OS changes unless
+  the workflow intentionally tracks `*-latest`.
 
 Do not update pinned GitHub Actions versions in this automation. Dependabot owns
 GitHub Actions dependency updates.
@@ -63,7 +63,7 @@ previous default migrates. When an older image enters deprecation, remove it
 before brownouts begin unless there is a documented compatibility reason to keep
 it.
 
-For MSRV, lint, formatting, documentation, Ruby, and text jobs, prefer explicit
+For MSRV, lint, formatting, documentation, and text jobs, prefer explicit
 maintained labels unless the workflow intentionally follows a moving default.
 
 ## Changes

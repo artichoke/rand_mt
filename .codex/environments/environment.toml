@@ -1,0 +1,11 @@
+version = 1
+name = "rand_mt"
+
+[setup]
+script = "./scripts/setup_codex_worktree.sh"
+
+[setup.win32]
+script = """
+Write-Error "rand_mt worktree setup is supported on macOS and Linux only."
+exit 69
+"""

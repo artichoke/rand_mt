@@ -1,7 +1,6 @@
-# Contributing to Artichoke – rand_mt
+# Contributing to Artichoke - rand_mt
 
-👋 Hi and welcome to [Artichoke]. Thanks for taking the time to contribute!
-💪💎🙌
+Welcome to [Artichoke]. Thanks for taking the time to contribute.
 
 Artichoke aspires to be a [recent MRI Ruby][mri-target]-compatible
 implementation of the Ruby programming language. [There is lots to do].
@@ -9,33 +8,35 @@ implementation of the Ruby programming language. [There is lots to do].
 [mri-target]:
   https://github.com/artichoke/artichoke/blob/trunk/RUBYSPEC.md#mri-target
 
-rand_mt is used to implement the default psuedorandom number generator that
-backs the [`Random` core class].
+rand_mt implements reference Mersenne Twister pseudorandom number generators.
+Artichoke uses this crate to implement the default pseudorandom number generator
+that backs the [`Random` core class].
 
-If Artichoke does not run Ruby source code in the same way that MRI does, it is
-a bug and we would appreciate if you [filed an issue so we can fix it]. [File
-bugs specific to rand_mt in this repository].
+If Artichoke does not run Ruby source code in the same way that MRI does, please
+[file an issue so we can fix it]. [File bugs specific to rand_mt in this
+repository].
 
-If you would like to contribute code to rand_mt 👩‍💻👨‍💻, find an issue that looks
-interesting and leave a comment that you're beginning to investigate. If there
-is no issue, please file one before beginning to work on a PR. [Good first
-issues are labeled `E-easy`].
+Maintenance of this repository is Codex-first. Prefer asking Codex to prepare
+routine code, documentation, CI, and dependency changes. Contributors should
+focus on issue selection, review, release decisions, and validating that the
+resulting diff and CI status match the intended change.
 
 ## Setup
 
-rand_mt includes Rust and Text sources. Developing on rand_mt requires
+rand_mt includes Rust and text sources. Developing on rand_mt requires
 configuring several dependencies.
 
 rand_mt uses [mise] to manage the local development toolchain declared in
-[`mise.toml`](mise.toml), including Node.js, Python, Ruby, Rust, and `uv`. For
+[`mise.toml`](mise.toml), including Node.js, Rust, and auxiliary Rust tools. For
 Rust, `mise` uses [rustup] under the hood. Nightly-only Rust workflows in this
 repository continue to use `rustup` directly.
 
 ### Rust Toolchain
 
-rand_mt depends on Rust and several compiler plugins for linting and formatting.
-rand_mt is guaranteed to build on the latest stable release of the Rust
-compiler.
+rand_mt depends on Rust and compiler plugins for linting and formatting. The
+crate is guaranteed to build on the Rust version declared as the minimum
+supported Rust version in [`Cargo.toml`](Cargo.toml), and it is tested on the
+latest stable Rust compiler.
 
 #### Installation
 
@@ -50,9 +51,8 @@ mise install
 profile plus the `clippy` and `rustfmt` components. `mise` installs that
 toolchain via [rustup].
 
-Some repository tasks still require nightly Rust. For example,
-[`Rakefile`](Rakefile) runs `cargo doc` with `rustup run --install nightly`,
-which will install nightly on demand if needed.
+Documentation checks use nightly Rust. Install nightly with
+`rustup toolchain install nightly` if you run those workflows locally.
 
 To update your stable Rust compiler to the latest version, run:
 
@@ -62,72 +62,30 @@ rustup update stable
 
 ### Rust Crates
 
-rand_mt depends on several Rust libraries, or crates. Once you have the Rust
-toolchain installed, you can install the crates specified in
-[`Cargo.toml`](Cargo.toml) by running:
+rand_mt depends on Rust crates from crates.io. Once you have the Rust toolchain
+installed, you can fetch and build the crates specified in [`Cargo.toml`] by
+running:
 
 ```sh
 cargo build
 ```
 
-### Ruby
-
-rand_mt requires a recent Ruby 4.0 and [bundler] for development tasks. Install
-the development toolchain with [mise]:
+rand_mt uses direct tool invocations instead of a repository task runner. The
+most common development commands are:
 
 ```sh
-mise install
-gem install bundler
-```
-
-The pinned versions for Node.js, Python, Ruby, Rust, and `uv` live in
-[`mise.toml`](mise.toml).
-
-The [`Gemfile`](Gemfile) in this repository specifies several dev dependencies.
-You can install these dependencies by running:
-
-```sh
-bundle install
-```
-
-[mise]: https://mise.jdx.dev/
-
-rand_mt uses [`rake`](Rakefile) as a task runner. You can see the available
-tasks by running:
-
-```console
-$ bundle exec rake --tasks
-rake build                         # Build Rust workspace
-rake bundle:audit:check            # Checks the Gemfile.lock for insecure dependencies
-rake bundle:audit:update           # Updates the bundler-audit vulnerability database
-rake doc                           # Generate Rust API documentation
-rake doc:open                      # Generate Rust API documentation and open it in a web browser
-rake fmt                           # Format sources
-rake fmt:rust                      # Format Rust sources with rustfmt
-rake fmt:text                      # Format text, YAML, and Markdown sources with prettier
-rake format                        # Format sources
-rake format:rust                   # Format Rust sources with rustfmt
-rake format:text                   # Format text, YAML, and Markdown sources with prettier
-rake lint                          # Lint sources
-rake lint:clippy                   # Lint Rust sources with Clippy
-rake lint:clippy:restriction       # Lint Rust sources with Clippy restriction pass (unenforced lints)
-rake lint:rubocop                  # Run RuboCop
-rake lint:rubocop:autocorrect      # Autocorrect RuboCop offenses (only when it's safe)
-rake lint:rubocop:autocorrect_all  # Autocorrect RuboCop offenses (safe and unsafe)
-rake test                          # Run rand_mt unit tests
-```
-
-To lint Ruby sources, rand_mt uses [RuboCop]. RuboCop runs as part of the `lint`
-task. To run RuboCop by itself, invoke the `lint:rubocop` task.
-
-```console
-$ bundle exec rake lint
-$ bundle exec rake lint:rubocop
+cargo build --workspace
+cargo test --workspace
+cargo fmt
+cargo clippy --workspace --all-features --all-targets
+npm run fmt
+RUSTDOCFLAGS="-D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs" \
+  cargo +nightly doc --workspace
 ```
 
 ### Node.js
 
-Node.js is an optional dependency that is used for formatting text sources with
+Node.js is an optional dependency used for formatting text sources with
 [prettier].
 
 Node.js is only required for formatting if modifying the following filetypes:
@@ -142,15 +100,10 @@ Install Node.js with `mise`:
 mise install
 ```
 
-### Python and uv
-
-Python and `uv` are optional dependencies that are used for linting YAML sources
-with `yamllint`.
-
-Install them with `mise`:
+Install the repository-local Node.js dependencies with:
 
 ```sh
-mise install
+npm ci
 ```
 
 ## Linting
@@ -158,14 +111,15 @@ mise install
 To lint and format Rust sources run:
 
 ```sh
-bundle exec rake fmt:rust lint:clippy
+cargo clippy --workspace --all-features --all-targets
+cargo fmt
 ```
 
 To lint and format text sources run:
 
 ```sh
-bundle exec rake fmt:text
-uv run yamllint --strict --format github .
+npm run fmt
+npm run fmt:check
 ```
 
 ## Testing
@@ -176,17 +130,23 @@ on testing] is a good place to start.
 To run tests:
 
 ```sh
-bundle exec rake test # or `cargo test`
+cargo test
 ```
 
-`cargo test` accepts a filter argument that will limit test execution to tests
-that substring match. For example, to run all of the tests for encoding:
-
-```sh
-cargo test encode
-```
+`cargo test` accepts a filter argument that limits test execution to tests that
+substring match.
 
 Tests are run for every PR. All builds must pass before merging a PR.
+
+## Codex Maintenance Workflow
+
+Prefer asking Codex to prepare changes on a branch, including any docs and CI
+updates needed for the patch. Review the resulting diff as authored code:
+
+- Confirm the change is scoped to the issue or maintenance task.
+- Confirm generated or mechanical changes are intentional.
+- Confirm CI passes before merging.
+- Ask Codex to follow up on review comments or failed checks.
 
 ## Updating Dependencies
 
@@ -210,11 +170,8 @@ Regular dependency bumps are handled by [@dependabot].
   https://github.com/artichoke/artichoke/issues/new
 [file bugs specific to rand_mt in this repository]:
   https://github.com/artichoke/rand_mt/issues/new
-[good first issues are labeled `e-easy`]:
-  https://github.com/artichoke/rand_mt/labels/E-easy
+[mise]: https://mise.jdx.dev/
 [rustup]: https://rustup.rs/
-[bundler]: https://bundler.io/
-[rubocop]: https://github.com/rubocop-hq/rubocop
 [prettier]: https://prettier.io/
 [rust book chapter on testing]:
   https://doc.rust-lang.org/book/ch11-00-testing.html
