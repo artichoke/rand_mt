@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-2025-vs2026, macos-26]
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
