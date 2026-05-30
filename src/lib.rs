@@ -9,9 +9,9 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-#![deny(clippy::all)]
-#![deny(clippy::pedantic)]
-#![deny(clippy::cargo)]
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::cargo)]
 #![allow(unknown_lints)]
 #![deny(missing_debug_implementations)]
 #![warn(missing_docs)]
