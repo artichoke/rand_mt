@@ -12,16 +12,18 @@ API. Treat those as compatibility surfaces.
 1. Classify the change before editing.
 2. Use the matching workflow section below to choose the guardrails and runbooks
    to consult.
-3. Keep the diff narrow. Do not mix behavior, dependency posture, release
+3. Use [ARCHITECTURE.md](ARCHITECTURE.md) as the repository map for module
+   responsibilities, boundaries, and architectural invariants.
+4. Keep the diff narrow. Do not mix behavior, dependency posture, release
    metadata, formatting, and automation cleanup unless the task requires it.
-4. Add or update focused tests for behavior changes, especially changes that can
+5. Add or update focused tests for behavior changes, especially changes that can
    affect deterministic output or Ruby compatibility.
-5. Run checks that match the risk of the change; use
+6. Run checks that match the risk of the change; use
    [CONTRIBUTING.md](CONTRIBUTING.md) for local command expectations. If a
    relevant check is skipped, explain why in the PR.
-6. Update README, crate docs, guardrails, or runbooks when public behavior,
-   compatibility claims, feature behavior, MSRV, dependency policy, or release
-   process changes.
+7. Update README, crate docs, [ARCHITECTURE.md](ARCHITECTURE.md), guardrails, or
+   runbooks when public behavior, compatibility claims, feature behavior, MSRV,
+   dependency policy, architectural invariants, or release process changes.
 
 ## Generator Behavior And Compatibility
 
@@ -110,6 +112,8 @@ documentation.
 
 Consult:
 
+- [Architecture](ARCHITECTURE.md), for repository shape, module boundaries, and
+  architectural invariants.
 - [High-quality Rust code](docs/guardrails/high-quality-rust-code.md), for
   documentation quality expectations.
 - [Working in public and publishing](docs/guardrails/working-in-public-and-publishing-oss-crates.md),
