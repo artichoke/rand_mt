@@ -78,7 +78,7 @@ cargo build --workspace
 cargo test --workspace
 cargo fmt
 cargo clippy --workspace --all-features --all-targets
-npm run fmt
+pnpm run fmt
 RUSTDOCFLAGS="-D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs" \
   cargo +nightly doc --workspace
 ```
@@ -103,7 +103,7 @@ mise install
 Install the repository-local Node.js dependencies with:
 
 ```sh
-npm ci
+pnpm install
 ```
 
 ## Linting
@@ -118,8 +118,8 @@ cargo fmt
 To lint and format text sources run:
 
 ```sh
-npm run fmt
-npm run fmt:check
+pnpm run fmt
+pnpm run fmt:check
 ```
 
 ## Testing

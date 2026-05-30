@@ -99,7 +99,7 @@ cargo test --workspace --no-default-features
 cargo clippy --workspace --all-features --all-targets
 RUSTDOCFLAGS="-D warnings -D rustdoc::broken_intra_doc_links --cfg docsrs" \
   cargo +nightly doc --workspace
-npx prettier --check '**/*'
+pnpm exec prettier --check '**/*'
 ```
 
 If a release-prep pull request is opened, also run `cargo package --allow-dirty`
