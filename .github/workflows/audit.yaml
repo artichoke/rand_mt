@@ -62,11 +62,6 @@ jobs:
       always() &&
       (github.event_name == 'schedule' || needs.changes.outputs.rust == 'true')
     runs-on: ubuntu-24.04
-    # Preserve the existing matrix-suffixed check context for merge policy.
-    strategy:
-      matrix:
-        checks:
-          - bans licenses sources
     permissions:
       contents: read # required to checkout repository
 
@@ -104,7 +99,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@bb137d7af7e4fb67e5f82a49c4fce4fad40782fe # v2.0.20
         with:
           arguments: --locked --all-features
-          command: check ${{ matrix.checks }}
+          command: check bans licenses sources
           command-arguments: --show-stats
 
   zizmor:
