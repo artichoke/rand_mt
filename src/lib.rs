@@ -90,7 +90,7 @@
 )]
 //! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.3")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.4")]
 #![no_std]
 
 #[cfg(any(test, doctest))]

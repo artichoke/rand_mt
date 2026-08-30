@@ -1,7 +1,6 @@
 # rand_mt
 
 [![GitHub Actions](https://github.com/artichoke/rand_mt/workflows/CI/badge.svg)](https://github.com/artichoke/rand_mt/actions)
-[![Code Coverage](https://codecov.artichokeruby.org/rand_mt/badges/flat.svg?nocache=2)](https://codecov.artichokeruby.org/rand_mt/index.html)
 [![Twitter](https://img.shields.io/twitter/follow/artichokeruby?label=Follow&style=social)](https://twitter.com/artichokeruby)
 <br>
 [![Crate](https://img.shields.io/crates/v/rand_mt.svg)](https://crates.io/crates/rand_mt)
@@ -32,7 +31,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "6.0.3"
+rand_mt = "6.0.4"
 ```
 
 Then create a RNG with an explicit seed:
