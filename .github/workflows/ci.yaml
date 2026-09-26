@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025-vs2026, macos-26]
+        os: [ubuntu-26.04, windows-2025-vs2026, macos-26]
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -58,7 +58,7 @@ jobs:
 
   build-msrv:
     name: Build (MSRV)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -95,7 +95,7 @@ jobs:
 
   rust:
     name: Lint and format Rust
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -144,7 +144,7 @@ jobs:
 
   text:
     name: Lint and format text
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
