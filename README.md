@@ -1,14 +1,11 @@
 # rand_mt
 
-[![GitHub Actions](https://github.com/artichoke/rand_mt/workflows/CI/badge.svg)](https://github.com/artichoke/rand_mt/actions)
-[![Code Coverage](https://codecov.artichokeruby.org/rand_mt/badges/flat.svg?nocache=2)](https://codecov.artichokeruby.org/rand_mt/index.html)
-[![Twitter](https://img.shields.io/twitter/follow/artichokeruby?label=Follow&style=social)](https://twitter.com/artichokeruby)
-<br>
+[![GitHub Actions](https://github.com/artichoke/rand_mt/actions/workflows/ci.yaml/badge.svg)](https://github.com/artichoke/rand_mt/actions)
 [![Crate](https://img.shields.io/crates/v/rand_mt.svg)](https://crates.io/crates/rand_mt)
 [![API](https://docs.rs/rand_mt/badge.svg)](https://docs.rs/rand_mt)
-[![API trunk](https://img.shields.io/badge/docs-trunk-blue.svg)](https://artichoke.github.io/rand_mt/rand_mt/)
 
-Implements a selection of Mersenne Twister random number generators.
+Reference MT19937 (`Mt`) and MT19937-64 (`Mt64`) pseudorandom number generators.
+Artichoke uses `Mt` to reproduce Ruby random number sequences.
 
 > A very fast random number generator of period 2<sup>19937</sup>-1. (Makoto
 > Matsumoto, 1997).
@@ -21,8 +18,8 @@ the [default PRNG in Ruby].
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 [default prng in ruby]: https://ruby-doc.org/core-3.1.2/Random.html
 
-This crate optionally depends on [`rand_core`] and implements `Rng` on the RNGs
-in this crate.
+This crate optionally depends on [`rand_core`] 0.10 and implements `TryRng` with
+an `Infallible` error, which also provides `Rng` through a blanket impl.
 
 [`rand_core`]: https://crates.io/crates/rand_core
 
@@ -50,11 +47,19 @@ not gather entropy.
 
 ## Crate Features
 
-`rand_mt` is `no_std` compatible. `rand_mt` has several optional features that
-are enabled by default:
+`rand_mt` is `no_std` and does not require `alloc`. It has one optional feature,
+enabled by default:
 
 - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
-  feature implements `Rng` and `SeedableRng` on the RNGs in this crate.
+  feature implements `TryRng` and `SeedableRng` on the RNGs in this crate, with
+  `Rng` provided by `rand_core`.
+
+Disable the default feature to use the generators without dependencies:
+
+```toml
+[dependencies]
+rand_mt = { version = "6.0.3", default-features = false }
+```
 
 Mersenne Twister requires approximately 2.5 kilobytes of internal state. To make
 the RNGs implemented in this crate practical to embed in other structs, you may
@@ -62,8 +67,8 @@ wish to store the RNG in a `Box`.
 
 ### Minimum Supported Rust Version
 
-This crate requires at least Rust 1.85.0. This version can be bumped in minor
-releases.
+This crate requires at least Rust 1.88.0. This version can be bumped in minor
+releases. Rust 1.88 enables typed slice chunks for byte filling.
 
 ## License
 
