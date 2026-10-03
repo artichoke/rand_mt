@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025-vs2026, macos-26]
+        os: [ubuntu-26.04, windows-2025-vs2026, macos-26]
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -58,7 +58,7 @@ jobs:
 
   build-msrv:
     name: Build (MSRV)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -73,8 +73,8 @@ jobs:
         run: |
           set -euo pipefail
           rustup set profile minimal
-          rustup toolchain install 1.85.0 --no-self-update
-          rustup default 1.85.0
+          rustup toolchain install 1.88.0 --no-self-update
+          rustup default 1.88.0
           rustc -Vv
           cargo -V
 
@@ -95,7 +95,7 @@ jobs:
 
   rust:
     name: Lint and format Rust
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       RUSTFLAGS: -D warnings
       RUST_BACKTRACE: 1
@@ -144,7 +144,7 @@ jobs:
 
   text:
     name: Lint and format text
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -164,7 +164,7 @@ jobs:
           executable: ${{ steps.mise.outputs.executable }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           run_install: false
 

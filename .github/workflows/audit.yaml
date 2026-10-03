@@ -14,7 +14,7 @@ jobs:
   changes:
     name: Detect relevant changes
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to checkout repository
     outputs:
@@ -71,7 +71,7 @@ jobs:
     if: >-
       always() &&
       (github.event_name == 'schedule' || needs.changes.outputs.rust == 'true')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to checkout repository
 
@@ -118,12 +118,12 @@ jobs:
     if: >-
       always() &&
       (github.event_name == 'schedule' || needs.changes.outputs.js == 'true')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to checkout repository
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -140,12 +140,12 @@ jobs:
           executable: ${{ steps.mise.outputs.executable }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ steps.toolchains.outputs.node }}
           cache: pnpm
@@ -163,7 +163,7 @@ jobs:
       always() &&
       (github.event_name == 'schedule' ||
       needs.changes.outputs.workflows == 'true')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to checkout repository
       security-events: write # required to add findings via sarif
@@ -186,7 +186,7 @@ jobs:
           executable: ${{ steps.mise.outputs.executable }}
 
       - name: Run zizmor 🌈
-        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
         with:
           persona: "pedantic"
           version: ${{ steps.toolchains.outputs.zizmor }}

@@ -1,13 +1,13 @@
 [package]
 name = "rand_mt"
-version = "6.0.4" # remember to set `html_root_url` in `src/lib.rs`.
+version = "6.1.0" # remember to set `html_root_url` in `src/lib.rs`.
 authors = [
     "David Creswick <dcrewi@gyrae.net>",
     "Ryan Lopopolo <rjl@hyperbo.la>",
 ]
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 readme = "README.md"
 repository = "https://github.com/artichoke/rand_mt"
 documentation = "https://docs.rs/rand_mt"

@@ -12,8 +12,8 @@
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
-#![allow(unknown_lints)]
-#![deny(missing_debug_implementations)]
+#![warn(missing_copy_implementations)]
+#![warn(missing_debug_implementations)]
 #![warn(missing_docs)]
 #![warn(rust_2018_idioms)]
 #![warn(trivial_casts, trivial_numeric_casts)]
@@ -56,7 +56,7 @@
 //! // Create the RNG.
 //! let mut rng = Mt64::new(0x1234_567_89ab_cdef_u64);
 //! // start grabbing randomness from rng...
-//! let mut buf = vec![0; 512];
+//! let mut buf = [0; 512];
 //! rng.fill_bytes(&mut buf);
 //! ```
 //!
@@ -74,11 +74,12 @@
 //!
 //! # Crate Features
 //!
-//! `rand_mt` is `no_std` compatible. `rand_mt` has several optional features
-//! that are enabled by default:
+//! `rand_mt` is `no_std` and does not require `alloc`. It has one optional
+//! feature, enabled by default:
 //!
 //! - **rand-traits** - Enables a dependency on [`rand_core`]. Activating this
-//!   feature implements `Rng` and `SeedableRng` on the RNGs in this crate.
+//!   feature implements `TryRng` and `SeedableRng` on the RNGs in this crate,
+//!   with `Rng` provided by `rand_core` through a blanket impl.
 //!
 //! Mersenne Twister requires approximately 2.5 kilobytes of internal state. To
 //! make the RNGs implemented in this crate practical to embed in other structs,
@@ -88,9 +89,13 @@
     not(feature = "rand-traits"),
     doc = "[`rand_core`]: https://crates.io/crates/rand_core"
 )]
-//! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html"
+//! # Minimum Supported Rust Version
+//!
+//! This crate requires Rust 1.88.0. MSRV may be bumped in minor releases.
+//!
+//! [`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html
 
-#![doc(html_root_url = "https://docs.rs/rand_mt/6.0.4")]
+#![doc(html_root_url = "https://docs.rs/rand_mt/6.1.0")]
 #![no_std]
 
 #[cfg(any(test, doctest))]
@@ -110,16 +115,15 @@ mod vectors;
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum RecoverRngError {
-    /// Attempted to recover an RNG with too many samples.
+    /// Attempted to recover an RNG with too few samples.
     ///
     /// Recover constructors require an exact number of samples to ensure the
     /// recovered RNG matches the state of the RNG that supplied all of the
     /// samples.
     TooFewSamples(usize),
-    /// Attempted to recover an RNG with too few samples.
+    /// Attempted to recover an RNG with too many samples.
     ///
-    /// Too few samples leaves the internal state buffer partially
-    /// uninitialized.
+    /// Too many samples would exceed the internal state buffer.
     ///
     /// Recover constructors require an exact number of samples to ensure the
     /// recovered RNG matches the state of the RNG that supplied all of the
@@ -160,7 +164,7 @@ mod tests {
         for tc in test_cases {
             let mut buf = String::new();
             write!(&mut buf, "{tc}").unwrap();
-            assert!(!buf.is_empty());
+            assert_ne!(buf, "");
         }
     }
 }

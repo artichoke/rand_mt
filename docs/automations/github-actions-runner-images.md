@@ -66,6 +66,18 @@ it.
 For MSRV, lint, formatting, documentation, and text jobs, prefer explicit
 maintained labels unless the workflow intentionally follows a moving default.
 
+When a newer image for an OS family reaches GA and GitHub announces that it will
+become that family's `*-latest` default, proactively replace the repository's
+older explicit label for that OS family throughout `.github/workflows/` unless a
+job documents a specific compatibility reason to stay on the older image. Do not
+retain the older label merely as extra coverage when the repository has no such
+reason.
+
+When replacing an older explicit image label, search every workflow under
+`.github/workflows/` and update all occurrences, including MSRV, lint, audit,
+documentation, text, publish, and repository-maintenance jobs. Do not leave the
+older label in a secondary workflow after updating the main build matrix.
+
 ## Changes
 
 If runner image state indicates no repository change is needed, do not create a

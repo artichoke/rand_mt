@@ -35,8 +35,8 @@ repository continue to use `rustup` directly.
 
 rand_mt depends on Rust and compiler plugins for linting and formatting. The
 crate is guaranteed to build on the Rust version declared as the minimum
-supported Rust version in [`Cargo.toml`](Cargo.toml), and it is tested on the
-latest stable Rust compiler.
+supported Rust version in [`Cargo.toml`](Cargo.toml) (currently Rust 1.88.0),
+and it is tested on the latest stable Rust compiler.
 
 #### Installation
 
@@ -147,6 +147,12 @@ updates needed for the patch. Review the resulting diff as authored code:
 - Confirm generated or mechanical changes are intentional.
 - Confirm CI passes before merging.
 - Ask Codex to follow up on review comments or failed checks.
+
+## Publishing
+
+Maintainers publish releases through crates.io trusted publishing. See
+[`docs/publishing.md`](docs/publishing.md) for the trust configuration, release
+procedure, and failure-recovery guidance.
 
 ## Updating Dependencies
 
