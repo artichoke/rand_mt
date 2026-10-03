@@ -321,14 +321,12 @@ impl Mt {
     #[inline]
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         const CHUNK: usize = size_of::<u32>();
-        let mut dest_chunks = dest.chunks_exact_mut(CHUNK);
+        let (dest_chunks, remainder) = dest.as_chunks_mut::<CHUNK>();
 
-        for next in &mut dest_chunks {
-            let chunk: [u8; CHUNK] = self.next_u32().to_le_bytes();
-            next.copy_from_slice(&chunk);
+        for next in dest_chunks {
+            *next = self.next_u32().to_le_bytes();
         }
 
-        let remainder = dest_chunks.into_remainder();
         if remainder.is_empty() {
             return;
         }
@@ -411,7 +409,7 @@ impl Mt {
         }
     }
 
-    /// Reseed a Mersenne Twister from am iterator of `u32`s.
+    /// Reseed a Mersenne Twister from an iterator of `u32`s.
     ///
     /// Key can have any length.
     #[inline]
