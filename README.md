@@ -29,7 +29,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rand_mt = "6.0.3"
+rand_mt = "6.1.0"
 ```
 
 Then create a RNG with an explicit seed:
@@ -58,7 +58,7 @@ Disable the default feature to use the generators without dependencies:
 
 ```toml
 [dependencies]
-rand_mt = { version = "6.0.3", default-features = false }
+rand_mt = { version = "6.1.0", default-features = false }
 ```
 
 Mersenne Twister requires approximately 2.5 kilobytes of internal state. To make
